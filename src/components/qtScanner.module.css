@@ -1,0 +1,38 @@
+.qr-scanner-container {
+  position: relative; /* Essential for positioning pseudo-elements */
+  overflow: hidden;
+  border-radius: 1rem;
+
+  & video {
+    width: auto;
+    height: auto;
+    display: block;
+  }
+}
+
+.qr-scanner-container::before,
+.qr-scanner-container::after {
+  content: "";
+  position: absolute;
+  width: 4rem; /* Length of the corner lines */
+  height: 4rem;
+  border-color: #4c5897;
+  border-style: solid;
+  z-index: 10; /* Ensure corners are on top */
+}
+
+/* Top-left corner */
+.qr-scanner-container::before {
+  top: 2rem;
+  left: 2rem;
+  border-width: 4px 0 0 4px; /* Top and Left borders only */
+  border-top-left-radius: 1rem;
+}
+
+/* Bottom-right corner */
+.qr-scanner-container::after {
+  bottom: 2rem;
+  right: 2rem;
+  border-width: 0 4px 4px 0; /* Bottom and Right borders only */
+  border-bottom-right-radius: 1rem;
+}

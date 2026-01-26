@@ -1,0 +1,19 @@
+.inviteOpponentsWrapper {
+  width: 20rem;
+}
+
+.diceBoxContainer {
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+}
+
+.relative {
+  position: relative;
+}
+
+.resultWrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
