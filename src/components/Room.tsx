@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { DiceTray } from "./DiceTray";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { OpponentTray } from "./OpponentTray";
 import {
   Box,
@@ -24,16 +24,19 @@ import { useThrottle } from "@custom-react-hooks/use-throttle";
 import type { RollResult } from "./types";
 import { parseDiceBoxResults } from "../helpers/resultsParser";
 import styles from "./diceTray.module.css";
+import { UserContext } from "./UserContext";
 
 export function Room() {
   const { roomId } = useParams();
   const [diceCombination, setDiceCombination] = useState("4d6");
   const throttledDiceCombination = useThrottle(diceCombination, 1000);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { userId } = useContext(UserContext);
 
   const {
     isConnected,
     room,
+    winners,
     joinRoom,
     leaveRoom,
     updateDiceRules,
@@ -108,7 +111,7 @@ export function Room() {
   function renderDiceTrays() {
     if (!room || room.participants.length < 2) {
       return (
-        <Center h="100%">
+        <Center>
           <Paper
             withBorder
             shadow="md"
@@ -116,14 +119,14 @@ export function Room() {
             className={styles.inviteOpponentsWrapper}
           >
             <Center>
-              <div>
+              <Box p="xl">
                 <Text ta="center" mb="md">
                   Invite opponents to start battling
                 </Text>
                 <Center>
                   <Button onClick={handleShareClick}>Invite</Button>
                 </Center>
-              </div>
+              </Box>
             </Center>
           </Paper>
         </Center>
@@ -135,10 +138,18 @@ export function Room() {
     for (let i = 0; i < room.participants.length; i++) {
       const player = room.participants[i];
 
-      trays.push(<OpponentTray key={player.id} player={player} />);
+      if (player.id === userId) {
+        continue;
+      }
+
+      const isWinner = winners.map((u) => u.id).includes(player.id);
+
+      trays.push(
+        <OpponentTray key={player.id} player={player} isWinner={isWinner} />
+      );
     }
 
-    return <SimpleGrid cols={4}>{trays}</SimpleGrid>;
+    return <SimpleGrid cols={trays.length}>{trays}</SimpleGrid>;
   }
 
   function renderDiceRules() {
@@ -172,10 +183,10 @@ export function Room() {
     );
   }
 
-  console.log({ room });
+  const isWinner = winners.map((u) => u.id).includes(userId);
 
   return (
-    <Box h="100%">
+    <>
       <Flex align="center" justify="center">
         <Title order={2} ta="center" mr="sm">
           Room {roomId}{" "}
@@ -192,15 +203,16 @@ export function Room() {
         {renderDiceRules()}
       </Center>
       <SimpleGrid cols={1}>
-        <Box h="30vh">{renderDiceTrays()}</Box>
+        <Box>{renderDiceTrays()}</Box>
         <Box h="40vh">
           <DiceTray
             diceCombination={diceCombination}
+            isWinner={isWinner}
             onRollDice={handleRollDice}
             onRollDiceResult={handleRollDiceResult}
           />
         </Box>
       </SimpleGrid>
-    </Box>
+    </>
   );
 }

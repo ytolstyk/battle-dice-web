@@ -99,6 +99,28 @@ export function useDiceWebSocket() {
     [userId]
   );
 
+  const winners = useMemo(() => {
+    if (!room) {
+      return [];
+    }
+
+    const { participants } = room;
+
+    const hasWinner = participants.every(
+      (user) => user.roll.total && user.roll.diceResults.length > 0
+    );
+
+    if (!hasWinner) {
+      return [];
+    }
+
+    const maxVal = participants.reduce((acc, u) => {
+      return Math.max(acc, u.roll.total);
+    }, 0);
+
+    return participants.filter((u) => u.roll.total === maxVal);
+  }, [room]);
+
   useEffect(() => {
     socket.connect();
 
@@ -125,6 +147,7 @@ export function useDiceWebSocket() {
   return {
     isConnected,
     room,
+    winners,
     isLoading,
     joinRoom,
     leaveRoom,

@@ -4,17 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { type RollResult } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
-import { Button, Center, Text, Paper } from "@mantine/core";
+import { Button, Center, Text, Paper, Flex } from "@mantine/core";
 import { parseDiceBoxResults } from "../helpers/resultsParser";
+import { IconLaurelWreath } from "@tabler/icons-react";
 
 type Props = {
   diceCombination: string;
+  isWinner: boolean;
   onRollDice: () => void;
   onRollDiceResult: (res: RollResult[]) => void;
 };
 
 export function DiceTray({
   diceCombination,
+  isWinner,
   onRollDice,
   onRollDiceResult,
 }: Props) {
@@ -83,10 +86,18 @@ export function DiceTray({
     }
 
     const { total } = parseDiceBoxResults(rollResult);
+    const icon = isWinner ? (
+      <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
+    ) : null;
 
     return (
       <div className={styles.resultWrapper}>
-        <Text p="xs">Result: {total}</Text>
+        <Flex align="center">
+          <Text p="xs" fw="bold">
+            Result: {total}
+          </Text>
+          {icon}
+        </Flex>
       </div>
     );
   };
