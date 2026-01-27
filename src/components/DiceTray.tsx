@@ -36,7 +36,6 @@ export function DiceTray({
         assetPath: "/assets/",
         scale: 6,
         onRollComplete: (results: RollResult[]) => {
-          console.log({ results });
           setRollResult(results);
           setIsDisabled(false);
           onRollDiceResult(results);
