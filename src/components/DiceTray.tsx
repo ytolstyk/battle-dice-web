@@ -1,7 +1,7 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
-import { type RollResult } from "./types";
+import { type RollResult, type User } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
 import { Button, Center, Text, Paper, Flex } from "@mantine/core";
@@ -11,6 +11,7 @@ import { IconLaurelWreath } from "@tabler/icons-react";
 type Props = {
   diceCombination: string;
   isWinner: boolean;
+  roomUser?: User | null;
   onRollDice: () => void;
   onRollDiceResult: (res: RollResult[]) => void;
 };
@@ -18,6 +19,7 @@ type Props = {
 export function DiceTray({
   diceCombination,
   isWinner,
+  roomUser,
   onRollDice,
   onRollDiceResult,
 }: Props) {
@@ -63,7 +65,7 @@ export function DiceTray({
     return () => {
       // remove the canvas + listeners
       Array.from(document.getElementsByClassName("dice-box-canvas")).forEach(
-        (el) => el.remove()
+        (el) => el.remove(),
       );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,16 +92,16 @@ export function DiceTray({
     ) : null;
 
     return (
-      <div className={styles.resultWrapper}>
-        <Flex align="center">
-          <Text p="xs" fw="bold">
-            Result: {total}
-          </Text>
-          {icon}
-        </Flex>
-      </div>
+      <Flex align="center">
+        <Text p="xs" fw="bold">
+          Result: {total}
+        </Text>
+        {icon}
+      </Flex>
     );
   };
+
+  const buttonDisabled = isDisabled || roomUser?.status === "hasRolled";
 
   return (
     <>
@@ -110,12 +112,17 @@ export function DiceTray({
             ref={diceBoxRef}
             className={styles.diceBoxContainer}
           >
-            {renderResult()}
+            <div className={styles.resultWrapper}>
+              <Text pt="xs" pl="xs" size="xl" fw="bold">
+                {roomUser?.name}
+              </Text>
+              {renderResult()}
+            </div>
           </div>
         </Paper>
       </Center>
       <Center>
-        <Button onClick={handleRoll} disabled={isDisabled}>
+        <Button onClick={handleRoll} disabled={buttonDisabled}>
           Roll {diceCombination}
         </Button>
       </Center>

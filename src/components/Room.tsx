@@ -7,6 +7,7 @@ import {
   Button,
   Center,
   Flex,
+  Grid,
   Paper,
   Popover,
   SimpleGrid,
@@ -25,22 +26,25 @@ import type { RollResult } from "./types";
 import { parseDiceBoxResults } from "../helpers/resultsParser";
 import styles from "./diceTray.module.css";
 import { UserContext } from "./UserContext";
+import { AddUserName } from "./AddUserName";
 
 export function Room() {
   const { roomId } = useParams();
+  const { userId, userName } = useContext(UserContext);
   const [diceCombination, setDiceCombination] = useState("4d6");
   const throttledDiceCombination = useThrottle(diceCombination, 1000);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { userId } = useContext(UserContext);
 
   const {
     isConnected,
     room,
+    roomUser,
     winners,
     joinRoom,
     leaveRoom,
     updateDiceRules,
     updateUserRollResult,
+    updateUserName,
     rollDice,
   } = useDiceWebSocket();
 
@@ -74,6 +78,17 @@ export function Room() {
   }, []);
 
   useEffect(() => {
+    if (!userName) {
+      modals.open({
+        title: "Enter your name",
+        children: <AddUserName />,
+        size: "md",
+        onClose: () => roomId && updateUserName(roomId),
+      });
+    }
+  }, [roomId, userName, updateUserName]);
+
+  useEffect(() => {
     if (roomId && throttledDiceCombination) {
       updateDiceRules(roomId, throttledDiceCombination);
     }
@@ -81,7 +96,7 @@ export function Room() {
   }, [roomId, throttledDiceCombination]);
 
   const handleDiceCombinationChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setDiceCombination(event.target.value);
   };
@@ -145,11 +160,13 @@ export function Room() {
       const isWinner = winners.map((u) => u.id).includes(player.id);
 
       trays.push(
-        <OpponentTray key={player.id} player={player} isWinner={isWinner} />
+        <Grid.Col key={player.id} span={{ base: 6, sm: 6, md: 4, lg: 3 }}>
+          <OpponentTray player={player} isWinner={isWinner} />
+        </Grid.Col>,
       );
     }
 
-    return <SimpleGrid cols={trays.length}>{trays}</SimpleGrid>;
+    return <Grid justify="center">{trays}</Grid>;
   }
 
   function renderDiceRules() {
@@ -208,6 +225,7 @@ export function Room() {
           <DiceTray
             diceCombination={diceCombination}
             isWinner={isWinner}
+            roomUser={roomUser}
             onRollDice={handleRollDice}
             onRollDiceResult={handleRollDiceResult}
           />

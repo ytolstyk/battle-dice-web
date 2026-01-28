@@ -33,7 +33,7 @@ export type ConnectingUser = {
 };
 
 export type User = ConnectingUser & {
-  status: "connected" | "disconnected" | "rolling";
+  status: "connected" | "disconnected" | "rolling" | "hasRolled";
   roll: Roll;
 };
 

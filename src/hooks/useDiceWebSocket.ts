@@ -21,6 +21,14 @@ export function useDiceWebSocket() {
     setIsConnected(false);
   }
 
+  const roomUser = useMemo(() => {
+    if (room) {
+      return room.participants.find((u) => u.id === userId);
+    }
+
+    return null;
+  }, [userId, room]);
+
   const joinRoom = useCallback(
     (roomId: string) => {
       setIsLoading(true);
@@ -34,7 +42,7 @@ export function useDiceWebSocket() {
         setIsLoading(false);
       });
     },
-    [connectingUser]
+    [connectingUser],
   );
 
   const leaveRoom = useCallback(
@@ -54,7 +62,7 @@ export function useDiceWebSocket() {
         setIsLoading(false);
       });
     },
-    [userId, room]
+    [userId, room],
   );
 
   const updateDiceRules = useCallback(
@@ -71,7 +79,7 @@ export function useDiceWebSocket() {
 
       socket.emit("updateDiceRules", payload);
     },
-    [userId, room?.isOwner]
+    [userId, room?.isOwner],
   );
 
   const rollDice = useCallback(
@@ -83,7 +91,7 @@ export function useDiceWebSocket() {
 
       socket.emit("rollDice", payload);
     },
-    [userId]
+    [userId],
   );
 
   const updateUserRollResult = useCallback(
@@ -96,7 +104,7 @@ export function useDiceWebSocket() {
 
       socket.emit("updateUserRollResult", payload);
     },
-    [userId]
+    [userId],
   );
 
   const winners = useMemo(() => {
@@ -107,10 +115,10 @@ export function useDiceWebSocket() {
     const { participants } = room;
 
     const hasWinner = participants.every(
-      (user) => user.roll.total && user.roll.diceResults.length > 0
+      (user) => user.roll.total && user.roll.diceResults.length > 0,
     );
 
-    if (!hasWinner) {
+    if (!hasWinner || participants.length < 2) {
       return [];
     }
 
@@ -121,6 +129,19 @@ export function useDiceWebSocket() {
     return participants.filter((u) => u.roll.total === maxVal);
   }, [room]);
 
+  const updateUserName = useCallback(
+    (roomId: string) => {
+      const payload = {
+        roomId,
+        userId,
+        userName,
+      };
+
+      socket.emit("updateUserName", payload);
+    },
+    [userId, userName],
+  );
+
   useEffect(() => {
     socket.connect();
 
@@ -130,6 +151,7 @@ export function useDiceWebSocket() {
     socket.on("diceRulesUpdated", setRoom);
     socket.on("diceRolled", setRoom);
     socket.on("rollResult", setRoom);
+    socket.on("userNameUpdated", setRoom);
 
     return () => {
       leaveRoom(room?.id ?? "");
@@ -139,6 +161,7 @@ export function useDiceWebSocket() {
       socket.on("diceRulesUpdated", setRoom);
       socket.off("diceRolled", setRoom);
       socket.off("rollResult", setRoom);
+      socket.off("userNameUpdated", setRoom);
       socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,10 +172,12 @@ export function useDiceWebSocket() {
     room,
     winners,
     isLoading,
+    roomUser,
     joinRoom,
     leaveRoom,
     updateDiceRules,
     updateUserRollResult,
     rollDice,
+    updateUserName,
   };
 }

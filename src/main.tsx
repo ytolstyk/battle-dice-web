@@ -9,6 +9,9 @@ import { Notifications } from "@mantine/notifications";
 import { UserProvider } from "./components/UserProvider.tsx";
 
 const theme = createTheme({});
+const metaTag = document.createElement("meta");
+metaTag.setAttribute("c", __COMMIT_HASH__);
+document.getElementsByTagName("head")[0].append(metaTag);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <UserProvider>
@@ -20,5 +23,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ModalsProvider>
       </BrowserRouter>
     </MantineProvider>
-  </UserProvider>
+  </UserProvider>,
 );
