@@ -5,7 +5,6 @@ import { type RollResult, type User } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
 import { Button, Center, Text, Paper, Flex } from "@mantine/core";
-import { parseDiceBoxResults } from "../helpers/resultsParser";
 import { IconLaurelWreath } from "@tabler/icons-react";
 
 type Props = {
@@ -24,7 +23,6 @@ export function DiceTray({
   onRollDiceResult,
 }: Props) {
   const DRP = new DiceParser();
-  const [rollResult, setRollResult] = useState<RollResult[]>([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const diceBoxId = "dice-box-main";
 
@@ -38,7 +36,6 @@ export function DiceTray({
         assetPath: "/assets/",
         scale: 6,
         onRollComplete: (results: RollResult[]) => {
-          setRollResult(results);
           setIsDisabled(false);
           onRollDiceResult(results);
         },
@@ -72,7 +69,6 @@ export function DiceTray({
   }, []);
 
   const handleRoll = () => {
-    setRollResult([]);
     setIsDisabled(true);
 
     if (diceBoxInstance) {
@@ -82,26 +78,27 @@ export function DiceTray({
   };
 
   const renderResult = () => {
-    if (rollResult.length === 0) {
+    if (
+      !roomUser ||
+      roomUser.roll.diceResults.length === 0 ||
+      roomUser.roll.total === 0
+    ) {
       return null;
     }
 
-    const { total } = parseDiceBoxResults(rollResult);
-    const icon = isWinner ? (
-      <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
-    ) : null;
+    const { total } = roomUser.roll;
 
     return (
-      <Flex align="center">
-        <Text p="xs" fw="bold">
-          Result: {total}
-        </Text>
-        {icon}
-      </Flex>
+      <Text pl="xs" fw="bold">
+        Result: {total}
+      </Text>
     );
   };
 
   const buttonDisabled = isDisabled || roomUser?.status === "hasRolled";
+  const icon = isWinner ? (
+    <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
+  ) : null;
 
   return (
     <>
@@ -113,9 +110,12 @@ export function DiceTray({
             className={styles.diceBoxContainer}
           >
             <div className={styles.resultWrapper}>
-              <Text pt="xs" pl="xs" size="xl" fw="bold">
-                {roomUser?.name}
-              </Text>
+              <Flex align="center" pt="xs" pl="xs">
+                <Text size="xl" fw="bold" mr="xs">
+                  {roomUser?.name}
+                </Text>
+                {icon}
+              </Flex>
               {renderResult()}
             </div>
           </div>

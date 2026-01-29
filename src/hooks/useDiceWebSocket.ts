@@ -67,7 +67,7 @@ export function useDiceWebSocket() {
 
   const updateDiceRules = useCallback(
     (roomId: string, diceRules: string) => {
-      if (!room?.isOwner) {
+      if (room?.ownerId !== userId) {
         return;
       }
 
@@ -79,7 +79,7 @@ export function useDiceWebSocket() {
 
       socket.emit("updateDiceRules", payload);
     },
-    [userId, room?.isOwner],
+    [userId, room?.ownerId],
   );
 
   const rollDice = useCallback(
@@ -130,16 +130,17 @@ export function useDiceWebSocket() {
   }, [room]);
 
   const updateUserName = useCallback(
-    (roomId: string) => {
+    (roomId: string, name: string) => {
       const payload = {
         roomId,
         userId,
-        userName,
+        userName: name,
       };
 
+      console.log("sending user name");
       socket.emit("updateUserName", payload);
     },
-    [userId, userName],
+    [userId],
   );
 
   useEffect(() => {

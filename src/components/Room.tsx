@@ -78,12 +78,13 @@ export function Room() {
   }, []);
 
   useEffect(() => {
-    if (!userName) {
+    if (!userName && roomId) {
       modals.open({
         title: "Enter your name",
-        children: <AddUserName />,
+        children: (
+          <AddUserName updateUserName={updateUserName} roomId={roomId} />
+        ),
         size: "md",
-        onClose: () => roomId && updateUserName(roomId),
       });
     }
   }, [roomId, userName, updateUserName]);
@@ -170,7 +171,7 @@ export function Room() {
   }
 
   function renderDiceRules() {
-    if (!room?.isOwner) {
+    if (room?.ownerId !== userId) {
       return <Text>Current roll: {diceCombination}</Text>;
     }
 
