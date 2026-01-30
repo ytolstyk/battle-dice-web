@@ -22,17 +22,23 @@ export function JoinRoomModal() {
     modals.closeAll();
   }
 
+  const checkAndNavigate = () => {
+    if (`/rooms/${roomId}`.match(regexTester)) {
+      navigate(`/rooms/${roomId}`);
+      modals.closeAll();
+    }
+  };
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRoomId(event.target.value);
+
+    checkAndNavigate();
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (`/rooms/${roomId}`.match(regexTester)) {
-      navigate(`/rooms/${roomId}`);
-      modals.closeAll();
-    }
+    checkAndNavigate();
   };
 
   return (
@@ -50,7 +56,7 @@ export function JoinRoomModal() {
         </form>
       </Center>
       <Text ta="center" mb="sm">
-        Or scan a QR code to join a room
+        Scan the QR code to join a room
       </Text>
       <Box m="lg">
         <Box className={styles["qr-scanner-container"]}>
