@@ -8,7 +8,7 @@ import { Button, Center, Text, Paper, Flex } from "@mantine/core";
 import { IconLaurelWreath } from "@tabler/icons-react";
 
 type Props = {
-  diceCombination: string;
+  diceCombination?: string;
   isWinner: boolean;
   roomUser?: User | null;
   onRollDice: () => void;
@@ -72,7 +72,7 @@ export function DiceTray({
     setIsDisabled(true);
 
     if (diceBoxInstance) {
-      diceBoxInstance.roll(DRP.parseNotation(diceCombination));
+      diceBoxInstance.roll(DRP.parseNotation(diceCombination || ""));
       onRollDice();
     }
   };
@@ -123,7 +123,7 @@ export function DiceTray({
       </Center>
       <Center>
         <Button onClick={handleRoll} disabled={buttonDisabled}>
-          Roll {diceCombination}
+          Roll {diceCombination || ""}
         </Button>
       </Center>
     </>

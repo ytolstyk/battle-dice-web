@@ -172,7 +172,7 @@ export function Room() {
 
   function renderDiceRules() {
     if (room?.ownerId !== userId) {
-      return <Text>Current roll: {diceCombination}</Text>;
+      return <Text>Current roll: {room?.diceRules}</Text>;
     }
 
     return (
@@ -224,7 +224,7 @@ export function Room() {
         <Box>{renderDiceTrays()}</Box>
         <Box h="40vh">
           <DiceTray
-            diceCombination={diceCombination}
+            diceCombination={room?.diceRules}
             isWinner={isWinner}
             roomUser={roomUser}
             onRollDice={handleRollDice}
