@@ -9,6 +9,7 @@ import { IconLaurelWreath } from "@tabler/icons-react";
 
 type Props = {
   diceCombination?: string;
+  isConnected: boolean;
   isWinner: boolean;
   roomUser?: User | null;
   onRollDice: () => void;
@@ -18,6 +19,7 @@ type Props = {
 export function DiceTray({
   diceCombination,
   isWinner,
+  isConnected,
   roomUser,
   onRollDice,
   onRollDiceResult,
@@ -95,7 +97,8 @@ export function DiceTray({
     );
   };
 
-  const buttonDisabled = isDisabled || roomUser?.status === "hasRolled";
+  const buttonDisabled =
+    !isConnected || isDisabled || roomUser?.status === "hasRolled";
   const icon = isWinner ? (
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;

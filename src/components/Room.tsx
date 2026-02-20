@@ -8,6 +8,8 @@ import {
   Center,
   Flex,
   Grid,
+  Loader,
+  LoadingOverlay,
   Paper,
   Popover,
   SimpleGrid,
@@ -140,7 +142,9 @@ export function Room() {
                   Invite opponents to start battling
                 </Text>
                 <Center>
-                  <Button onClick={handleShareClick}>Invite</Button>
+                  <Button disabled={!isConnected} onClick={handleShareClick}>
+                    Invite
+                  </Button>
                 </Center>
               </Box>
             </Center>
@@ -204,7 +208,20 @@ export function Room() {
   const isWinner = winners.map((u) => u.id).includes(userId);
 
   return (
-    <>
+    <Box pos="relative">
+      <LoadingOverlay
+        visible={!isConnected}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+        loaderProps={{
+          children: (
+            <Flex direction="column" align="center" gap="lg">
+              <Loader color="blue" />
+              <div>Connecting to the free cluster</div>
+            </Flex>
+          ),
+        }}
+      />
       <Flex align="center" justify="center">
         <Title order={2} ta="center" mr="sm">
           Room {roomId}{" "}
@@ -224,6 +241,7 @@ export function Room() {
         <Box>{renderDiceTrays()}</Box>
         <Box h="40vh">
           <DiceTray
+            isConnected={isConnected}
             diceCombination={room?.diceRules}
             isWinner={isWinner}
             roomUser={roomUser}
@@ -232,6 +250,6 @@ export function Room() {
           />
         </Box>
       </SimpleGrid>
-    </>
+    </Box>
   );
 }
