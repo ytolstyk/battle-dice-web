@@ -1,6 +1,23 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
+
+const DICE_COLORS = [
+  "#e74c3c",
+  "#e67e22",
+  "#f1c40f",
+  "#2ecc71",
+  "#1abc9c",
+  "#3498db",
+  "#9b59b6",
+  "#e91e63",
+  "#00bcd4",
+  "#ff5722",
+];
+
+function getRandomDiceColor() {
+  return DICE_COLORS[Math.floor(Math.random() * DICE_COLORS.length)];
+}
 import { type RollResult, type User } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
@@ -74,7 +91,11 @@ export function DiceTray({
     setIsDisabled(true);
 
     if (diceBoxInstance) {
-      diceBoxInstance.roll(DRP.parseNotation(diceCombination || ""));
+      const color = getRandomDiceColor();
+      const notation = DRP.parseNotation(diceCombination || "").map(
+        (group: object) => ({ ...group, themeColor: color }),
+      );
+      diceBoxInstance.roll(notation);
       onRollDice();
     }
   };
