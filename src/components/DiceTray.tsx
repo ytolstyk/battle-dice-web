@@ -155,7 +155,7 @@ export function DiceTray({
       <Center>
         <Flex gap="sm">
           <Button onClick={handleRoll} disabled={buttonDisabled}>
-            Roll {diceCombination || ""}
+            Roll {diceCombination && diceCombination.length <= 10 ? diceCombination : ""}
           </Button>
           {!isOwner && roomUser?.status === "hasRolled" && (
             <Button

@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, Paper, Text } from "@mantine/core";
+import { ActionIcon, Box, Flex, Paper, Text } from "@mantine/core";
 import type { User } from "./types";
 import {
   IconDice6,
@@ -61,7 +61,7 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
 
     return (
       <>
-        <Text>{text}</Text>
+        <Text style={{ maxHeight: "4rem", overflowY: "auto" }}>{text}</Text>
         <Text fw="bold">Result: {player.roll.total}</Text>
       </>
     );
@@ -97,16 +97,25 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
 
   return (
     <Paper withBorder shadow="md" p="md" mih="10rem">
-      <Flex align="center" mb="md">
-        <Text size="xl" fw="bold" inline mr="xs">
-          {player.name}
-        </Text>
-        {winnerIcon}
-        <Flex flex={1} />
-        {renderRollIcon()}
-        {rerollRequest}
-      </Flex>
-      {renderResult()}
+      <Box
+        p="xs"
+        mb="xs"
+        style={{
+          backgroundColor: "color-mix(in srgb, var(--mantine-color-body) 50%, transparent)",
+          borderRadius: "var(--mantine-radius-sm)",
+        }}
+      >
+        <Flex align="center" mb={hasResults ? "xs" : 0}>
+          <Text size="xl" fw="bold" inline mr="xs">
+            {player.name}
+          </Text>
+          {winnerIcon}
+          <Flex flex={1} />
+          {renderRollIcon()}
+          {rerollRequest}
+        </Flex>
+        {renderResult()}
+      </Box>
     </Paper>
   );
 }

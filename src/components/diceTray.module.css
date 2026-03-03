@@ -16,4 +16,11 @@
   position: absolute;
   left: 0;
   top: 0;
+  background-color: color-mix(
+    in srgb,
+    var(--mantine-color-body) 70%,
+    transparent
+  );
+  border-radius: 0 0 var(--mantine-radius-sm) 0;
+  padding: 4px 8px 4px 0;
 }
