@@ -1,7 +1,7 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
-import { type RollResult, type User } from "./types";
+import { type RollResult, type Roll, type User } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
 import { Button, Center, Text, Paper, Flex } from "@mantine/core";
@@ -31,7 +31,7 @@ type Props = {
   isWinner: boolean;
   roomUser?: User | null;
   onRollDice: () => void;
-  onRollDiceResult: (res: RollResult[]) => void;
+  onRollDiceResult: (roll: Roll) => void;
   onRequestReroll: () => void;
 };
 
@@ -45,7 +45,7 @@ export function DiceTray({
   onRollDiceResult,
   onRequestReroll,
 }: Props) {
-  const DRP = new DiceParser();
+  const drpRef = useRef(new DiceParser());
   const [isDisabled, setIsDisabled] = useState(false);
   const diceBoxId = "dice-box-main";
 
@@ -59,8 +59,19 @@ export function DiceTray({
         assetPath: "/assets/",
         scale: 6,
         onRollComplete: (results: RollResult[]) => {
+          const rerolls = drpRef.current.handleRerolls(results);
+          if (rerolls.length > 0) {
+            DiceBox.reroll(rerolls);
+            return;
+          }
+          const finalResults = drpRef.current.parseFinalResults(results);
           setIsDisabled(false);
-          onRollDiceResult(results);
+          onRollDiceResult({
+            diceResults: results.flatMap((group) =>
+              group.rolls.map((r) => ({ dieType: r.dieType, value: r.value })),
+            ),
+            total: finalResults.value,
+          });
         },
       });
 
@@ -96,7 +107,7 @@ export function DiceTray({
 
     if (diceBoxInstance) {
       const color = getRandomDiceColor();
-      const notation = DRP.parseNotation(diceCombination || "").map(
+      const notation = drpRef.current.parseNotation(diceCombination || "").map(
         (group: object) => ({ ...group, themeColor: color }),
       );
       diceBoxInstance.roll(notation);

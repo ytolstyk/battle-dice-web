@@ -24,8 +24,7 @@ import { ShareRoomModal } from "./ShareRoomModal";
 import { useDiceWebSocket } from "../hooks/useDiceWebSocket";
 import { IconInfoSquareRounded, IconShare } from "@tabler/icons-react";
 import { useThrottle } from "@custom-react-hooks/use-throttle";
-import type { RollResult } from "./types";
-import { parseDiceBoxResults } from "../helpers/resultsParser";
+import type { Roll } from "./types";
 import styles from "./diceTray.module.css";
 import { UserContext } from "./UserContext";
 import { AddUserName } from "./AddUserName";
@@ -124,9 +123,9 @@ export function Room() {
     }
   };
 
-  const handleRollDiceResult = (results: RollResult[]) => {
+  const handleRollDiceResult = (roll: Roll) => {
     if (roomId) {
-      updateUserRollResult(roomId, parseDiceBoxResults(results));
+      updateUserRollResult(roomId, roll);
     }
   };
 

@@ -27,10 +27,11 @@ declare module "@3d-dice/dice-box" {
   class DiceBoxClass {
     constructor(options?: DiceBoxOptions);
     init(): Promise<void>;
-    show(): this & { roll: (data: any) => void };
+    show(): this & { roll: (data: unknown) => void };
     hide(): this & { clear: () => void };
     clear(): void;
     roll(arg: string): void;
+    reroll(arg: string[]): void;
     add(roll: string, groupId?: string | number): void;
     onRollComplete?: OnRollCompleteHandler;
   }
@@ -44,19 +45,23 @@ declare module "@3d-dice/dice-ui/src/displayResults" {
 
     /**
      * Show parsed/final dice results in the UI.
-     * The shape of results is unknown here, use `any` or refine as you learn it.
+     * The shape of results is unknown here, use `unknown` or refine as you learn it.
      */
-    showResults(results: any): void;
+    showResults(results: unknown): void;
 
-    /** Clear any shown results */
+    /** Clear unknown shown results */
     clear(): void;
   }
 }
 
 declare module "@3d-dice/dice-parser-interface" {
   export default class DiceParser {
-    constructor(...args: any[]);
-    parse?(input: string): any;
-    parseNotation(input: string): any;
+    constructor(...args: unknown[]);
+    parse?(input: string): unknown;
+    parseNotation(input: string): unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleRerolls(results: unknown): any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parseFinalResults(results: unknown): any;
   }
 }
