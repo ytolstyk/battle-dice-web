@@ -26,6 +26,7 @@ export type DiceResult = {
 export type Roll = {
   diceResults: DiceResult[];
   total: number;
+  modDescription?: string;
 };
 
 export type ConnectingUser = {

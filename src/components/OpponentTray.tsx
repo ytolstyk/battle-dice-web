@@ -62,6 +62,9 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
     return (
       <>
         <Text style={{ maxHeight: "4rem", overflowY: "auto" }}>{text}</Text>
+        {player.roll.modDescription && (
+          <Text size="xs" c="dimmed">{player.roll.modDescription}</Text>
+        )}
         <Text fw="bold">Result: {player.roll.total}</Text>
       </>
     );

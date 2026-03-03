@@ -41,8 +41,9 @@ type DieGroup = {
 type DieGroupMod = {
   type: string;
   highlow?: "h" | "l";
-  expr?: number | { type: string; value: number };
-  target?: { mod: string; value: { type: string; value: number } };
+  expr?: { type: string; value: number }; // keep/drop count, success/failure threshold
+  mod?: string; // comparison operator for success/failure (">" | "<" | "=")
+  target?: { type?: string; mod: string | null; value: { type: string; value: number } }; // explode/reroll threshold
 };
 
 // Result returned by DiceParser.parseFinalResults

@@ -24,6 +24,72 @@ function getRandomDiceColor() {
   return DICE_COLORS[Math.floor(Math.random() * DICE_COLORS.length)];
 }
 
+function formatModDescription(groups: DieGroup[]): string {
+  const parts: string[] = [];
+
+  for (const group of groups) {
+    if (!group.mods?.length) continue;
+
+    for (const mod of group.mods) {
+      const exprVal = mod.expr?.value;
+      const targetVal = mod.target?.value?.value;
+      const targetMod = mod.target?.mod;
+
+      switch (mod.type) {
+        case "keep":
+          parts.push(
+            `keep ${mod.highlow === "h" ? "highest" : "lowest"} ${exprVal}`,
+          );
+          break;
+        case "drop":
+          parts.push(
+            `drop ${mod.highlow === "h" ? "highest" : "lowest"} ${exprVal}`,
+          );
+          break;
+        case "explode":
+          parts.push(
+            targetVal !== undefined
+              ? `explode ${targetMod}${targetVal}`
+              : "explode on max",
+          );
+          break;
+        case "compound":
+          parts.push(
+            targetVal !== undefined
+              ? `compound ${targetMod}${targetVal}`
+              : "compound explode",
+          );
+          break;
+        case "penetrate":
+          parts.push("penetrate");
+          break;
+        case "reroll":
+          parts.push(
+            targetVal !== undefined
+              ? `reroll ${targetMod}${targetVal}`
+              : "reroll 1s",
+          );
+          break;
+        case "rerollOnce":
+          parts.push(
+            targetVal !== undefined
+              ? `reroll once ${targetMod}${targetVal}`
+              : "reroll once on 1",
+          );
+          break;
+        case "success":
+          parts.push(`successes ${mod.mod}${exprVal}`);
+          break;
+        case "failure":
+          parts.push(`failures ${mod.mod ?? ""}${exprVal ?? ""}`);
+          break;
+      }
+    }
+  }
+
+  return parts.join(" · ");
+}
+
 type Props = {
   diceCombination?: string;
   isConnected: boolean;
@@ -46,6 +112,7 @@ export function DiceTray({
   onRequestReroll,
 }: Props) {
   const drpRef = useRef(new DiceParser());
+  const modDescriptionRef = useRef("");
   const [isDisabled, setIsDisabled] = useState(false);
   const diceBoxId = "dice-box-main";
 
@@ -69,9 +136,13 @@ export function DiceTray({
           setIsDisabled(false);
           onRollDiceResult({
             diceResults: results.flatMap((group) =>
-              group.rolls.map((r) => ({ dieType: r.dieType as DieType, value: r.value })),
+              group.rolls.map((r) => ({
+                dieType: r.dieType as DieType,
+                value: r.value,
+              })),
             ),
             total: finalResults.value,
+            modDescription: modDescriptionRef.current || undefined,
           });
         },
       });
@@ -108,9 +179,9 @@ export function DiceTray({
 
     if (diceBoxInstance) {
       const color = getRandomDiceColor();
-      const notation = drpRef.current.parseNotation(diceCombination || "").map(
-        (group) => ({ ...group, themeColor: color }),
-      );
+      const parsed = drpRef.current.parseNotation(diceCombination || "");
+      modDescriptionRef.current = formatModDescription(parsed);
+      const notation = parsed.map((group) => ({ ...group, themeColor: color }));
       diceBoxInstance.roll(notation);
       onRollDice();
     }
@@ -125,12 +196,19 @@ export function DiceTray({
       return null;
     }
 
-    const { total } = roomUser.roll;
+    const { total, modDescription } = roomUser.roll;
 
     return (
-      <Text pl="xs" fw="bold">
-        Result: {total}
-      </Text>
+      <>
+        {modDescription && (
+          <Text pl="xs" size="xs" c="dimmed">
+            {modDescription}
+          </Text>
+        )}
+        <Text pl="xs" fw="bold">
+          Result: {total}
+        </Text>
+      </>
     );
   };
 
@@ -167,7 +245,10 @@ export function DiceTray({
       <Center>
         <Flex gap="sm">
           <Button onClick={handleRoll} disabled={buttonDisabled}>
-            Roll {diceCombination && diceCombination.length <= 10 ? diceCombination : ""}
+            Roll{" "}
+            {diceCombination && diceCombination.length <= 10
+              ? diceCombination
+              : ""}
           </Button>
           {!isOwner && roomUser?.status === "hasRolled" && (
             <Button
