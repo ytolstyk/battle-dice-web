@@ -37,32 +37,41 @@ export function useDiceWebSocket() {
     return null;
   }, [userId, room]);
 
-  const prevParticipantIdsRef = useRef<Set<string>>(new Set());
+  const prevParticipantsRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     if (!room) return;
 
     const currentIds = new Set(room.participants.map((u) => u.id));
-    console.log("Current participant IDs:", currentIds);
-    for (const participant of room.participants) {
-      if (
-        participant.id !== userId &&
-        !prevParticipantIdsRef.current.has(participant.id) &&
-        prevParticipantIdsRef.current.size > 0
-      ) {
-        console.log(
-          `New participant joined: ${participant.name} (ID: ${participant.id})`,
-        );
-        notifications.show({
-          title: "Player joined",
-          message: `${participant.name || "Someone"} joined the room`,
-          color: "blue",
-          autoClose: 4000,
-        });
+    const prev = prevParticipantsRef.current;
+
+    if (prev.size > 0) {
+      for (const participant of room.participants) {
+        if (participant.id !== userId && !prev.has(participant.id)) {
+          notifications.show({
+            title: "Player joined",
+            message: `${participant.name || "Someone"} joined the room`,
+            color: "blue",
+            autoClose: 4000,
+          });
+        }
+      }
+
+      for (const [id, name] of prev) {
+        if (id !== userId && !currentIds.has(id)) {
+          notifications.show({
+            title: "Player left",
+            message: `${name || "Someone"} left the room`,
+            color: "gray",
+            autoClose: 4000,
+          });
+        }
       }
     }
 
-    prevParticipantIdsRef.current = currentIds;
+    prevParticipantsRef.current = new Map(
+      room.participants.map((u) => [u.id, u.name]),
+    );
   }, [room, userId]);
 
   const joinRoom = useCallback(
