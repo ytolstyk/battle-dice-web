@@ -1,6 +1,11 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
+import { type RollResult, type User } from "./types";
+import styles from "./diceTray.module.css";
+import "./styles.css";
+import { Button, Center, Text, Paper, Flex } from "@mantine/core";
+import { IconLaurelWreath } from "@tabler/icons-react";
 
 const DICE_COLORS = [
   "#e74c3c",
@@ -18,28 +23,27 @@ const DICE_COLORS = [
 function getRandomDiceColor() {
   return DICE_COLORS[Math.floor(Math.random() * DICE_COLORS.length)];
 }
-import { type RollResult, type User } from "./types";
-import styles from "./diceTray.module.css";
-import "./styles.css";
-import { Button, Center, Text, Paper, Flex } from "@mantine/core";
-import { IconLaurelWreath } from "@tabler/icons-react";
 
 type Props = {
   diceCombination?: string;
   isConnected: boolean;
+  isOwner: boolean;
   isWinner: boolean;
   roomUser?: User | null;
   onRollDice: () => void;
   onRollDiceResult: (res: RollResult[]) => void;
+  onRequestReroll: () => void;
 };
 
 export function DiceTray({
   diceCombination,
   isWinner,
   isConnected,
+  isOwner,
   roomUser,
   onRollDice,
   onRollDiceResult,
+  onRequestReroll,
 }: Props) {
   const DRP = new DiceParser();
   const [isDisabled, setIsDisabled] = useState(false);
@@ -119,7 +123,10 @@ export function DiceTray({
   };
 
   const buttonDisabled =
-    !isConnected || isDisabled || roomUser?.status === "hasRolled";
+    !isConnected ||
+    isDisabled ||
+    roomUser?.status !== "connected" ||
+    !diceCombination;
   const icon = isWinner ? (
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;
@@ -146,9 +153,20 @@ export function DiceTray({
         </Paper>
       </Center>
       <Center>
-        <Button onClick={handleRoll} disabled={buttonDisabled}>
-          Roll {diceCombination || ""}
-        </Button>
+        <Flex gap="sm">
+          <Button onClick={handleRoll} disabled={buttonDisabled}>
+            Roll {diceCombination || ""}
+          </Button>
+          {!isOwner && roomUser?.status === "hasRolled" && (
+            <Button
+              variant="light"
+              onClick={onRequestReroll}
+              disabled={!isConnected}
+            >
+              Request Reroll
+            </Button>
+          )}
+        </Flex>
       </Center>
     </>
   );

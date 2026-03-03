@@ -1,4 +1,4 @@
-import { Flex, Paper, Text } from "@mantine/core";
+import { ActionIcon, Flex, Paper, Text } from "@mantine/core";
 import type { User } from "./types";
 import {
   IconDice6,
@@ -8,12 +8,17 @@ import {
   IconDice2,
   IconDice1,
   IconLaurelWreath,
+  IconSquareCheck,
+  IconSquareX,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 type Props = {
   player: User;
   isWinner: boolean;
+  isOwner: boolean;
+  onApproveReroll: () => void;
+  onDeclineReroll: () => void;
 };
 
 const ICON_MAP = [
@@ -25,7 +30,7 @@ const ICON_MAP = [
   IconDice6,
 ];
 
-export function OpponentTray({ player, isWinner }: Props) {
+export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDeclineReroll }: Props) {
   const [iconIndex, setIconIndex] = useState(0);
   const hasResults = player.roll.total && player.roll.diceResults.length > 0;
 
@@ -76,14 +81,30 @@ export function OpponentTray({ player, isWinner }: Props) {
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;
 
+  const rerollRequest = isOwner && player.status === "requestedReroll" ? (
+    <Flex direction="column" align="flex-end" gap={2}>
+      <Text size="xs" c="dimmed">Approve reroll?</Text>
+      <Flex gap={4}>
+        <ActionIcon color="green" variant="subtle" size="sm" onClick={onApproveReroll}>
+          <IconSquareCheck size={18} />
+        </ActionIcon>
+        <ActionIcon color="red" variant="subtle" size="sm" onClick={onDeclineReroll}>
+          <IconSquareX size={18} />
+        </ActionIcon>
+      </Flex>
+    </Flex>
+  ) : null;
+
   return (
     <Paper withBorder shadow="md" p="md" mih="10rem">
       <Flex align="center" mb="md">
-        <Text size="xl" fw="bold" inline mr="md">
+        <Text size="xl" fw="bold" inline mr="xs">
           {player.name}
         </Text>
-        {renderRollIcon()}
         {winnerIcon}
+        <Flex flex={1} />
+        {renderRollIcon()}
+        {rerollRequest}
       </Flex>
       {renderResult()}
     </Paper>

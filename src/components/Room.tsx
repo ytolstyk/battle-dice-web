@@ -33,7 +33,7 @@ import { AddUserName } from "./AddUserName";
 export function Room() {
   const { roomId } = useParams();
   const { userId, userName } = useContext(UserContext);
-  const [diceCombination, setDiceCombination] = useState("4d6");
+  const [diceCombination, setDiceCombination] = useState("2d6 + 1d8 + 1d12");
   const throttledDiceCombination = useThrottle(diceCombination, 1000);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -47,6 +47,9 @@ export function Room() {
     updateDiceRules,
     updateUserRollResult,
     rollDice,
+    requestReroll,
+    approveReroll,
+    declineReroll,
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
@@ -127,6 +130,12 @@ export function Room() {
     }
   };
 
+  const handleRequestReroll = () => {
+    if (roomId) {
+      requestReroll(roomId);
+    }
+  };
+
   function renderDiceTrays() {
     if (!room || room.participants.length < 2) {
       return (
@@ -164,10 +173,17 @@ export function Room() {
       }
 
       const isWinner = winners.map((u) => u.id).includes(player.id);
+      const isOwner = room.ownerId === userId;
 
       trays.push(
         <Grid.Col key={player.id} span={{ base: 6, sm: 6, md: 4, lg: 3 }}>
-          <OpponentTray player={player} isWinner={isWinner} />
+          <OpponentTray
+            player={player}
+            isWinner={isWinner}
+            isOwner={isOwner}
+            onApproveReroll={() => roomId && approveReroll(roomId, player.id)}
+            onDeclineReroll={() => roomId && declineReroll(roomId, player.id)}
+          />
         </Grid.Col>,
       );
     }
@@ -190,6 +206,7 @@ export function Room() {
           onChange={handleDiceCombinationChange}
           mr="sm"
           styles={{ input: { textAlign: "center" } }}
+          disabled={!isConnected}
         />
         <Popover width={200} position="bottom" withArrow shadow="md">
           <Popover.Target>
@@ -243,11 +260,13 @@ export function Room() {
         <Box h="40vh">
           <DiceTray
             isConnected={isConnected}
+            isOwner={room?.ownerId === userId}
             diceCombination={room?.diceRules}
             isWinner={isWinner}
             roomUser={roomUser}
             onRollDice={handleRollDice}
             onRollDiceResult={handleRollDiceResult}
+            onRequestReroll={handleRequestReroll}
           />
         </Box>
       </SimpleGrid>

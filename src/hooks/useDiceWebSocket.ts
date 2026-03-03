@@ -174,6 +174,27 @@ export function useDiceWebSocket() {
     return participants.filter((u) => u.roll.total === maxVal);
   }, [room]);
 
+  const requestReroll = useCallback(
+    (roomId: string) => {
+      socket.emit("requestReroll", { roomId, userId });
+    },
+    [userId],
+  );
+
+  const approveReroll = useCallback(
+    (roomId: string, targetUserId: string) => {
+      socket.emit("approveReroll", { roomId, userId, targetUserId });
+    },
+    [userId],
+  );
+
+  const declineReroll = useCallback(
+    (roomId: string, targetUserId: string) => {
+      socket.emit("declineReroll", { roomId, userId, targetUserId });
+    },
+    [userId],
+  );
+
   const updateUserName = useCallback(
     (roomId: string, name: string) => {
       const payload = {
@@ -199,6 +220,7 @@ export function useDiceWebSocket() {
     socket.on("rollResult", setRoom);
     socket.on("userNameUpdated", setRoom);
     socket.on("rerollRequested", setRoom);
+    socket.on("rerollResolved", setRoom);
 
     return () => {
       leaveRoom(room?.id ?? "");
@@ -210,6 +232,7 @@ export function useDiceWebSocket() {
       socket.off("rollResult", setRoom);
       socket.off("userNameUpdated", setRoom);
       socket.off("rerollRequested", setRoom);
+      socket.off("rerollResolved", setRoom);
       socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -226,6 +249,9 @@ export function useDiceWebSocket() {
     updateDiceRules,
     updateUserRollResult,
     rollDice,
+    requestReroll,
+    approveReroll,
+    declineReroll,
     updateUserName,
   };
 }

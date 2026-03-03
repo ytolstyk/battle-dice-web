@@ -38,7 +38,8 @@ export type User = ConnectingUser & {
     | "disconnected"
     | "rolling"
     | "hasRolled"
-    | "requestedReroll";
+    | "requestedReroll"
+    | "rerollDenied";
   roll: Roll;
 };
 
