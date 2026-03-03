@@ -100,6 +100,7 @@ type Props = {
   onRollDice: () => void;
   onRollDiceResult: (roll: Roll) => void;
   onRequestReroll: () => void;
+  onResetRoom: () => void;
 };
 
 export function DiceTray({
@@ -111,6 +112,7 @@ export function DiceTray({
   onRollDice,
   onRollDiceResult,
   onRequestReroll,
+  onResetRoom,
 }: Props) {
   const drpRef = useRef(new DiceParser());
   const modDescriptionRef = useRef("");
@@ -266,6 +268,15 @@ export function DiceTray({
             disabled={!isConnected}
           >
             Request Reroll
+          </Button>
+        )}
+        {isOwner && (
+          <Button
+            variant="subtle"
+            onClick={onResetRoom}
+            disabled={!isConnected}
+          >
+            Reset
           </Button>
         )}
       </Flex>

@@ -209,6 +209,17 @@ export function useDiceWebSocket() {
     [userId],
   );
 
+  const resetRoom = useCallback(
+    (roomId: string) => {
+      if (room?.ownerId !== userId) {
+        return;
+      }
+
+      socket.emit("resetRoom", { roomId, userId });
+    },
+    [userId, room?.ownerId],
+  );
+
   useEffect(() => {
     socket.connect();
 
@@ -253,5 +264,6 @@ export function useDiceWebSocket() {
     approveReroll,
     declineReroll,
     updateUserName,
+    resetRoom,
   };
 }

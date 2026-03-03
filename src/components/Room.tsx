@@ -47,6 +47,7 @@ export function Room() {
     requestReroll,
     approveReroll,
     declineReroll,
+    resetRoom,
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
@@ -141,6 +142,12 @@ export function Room() {
   const handleRequestReroll = () => {
     if (roomId) {
       requestReroll(roomId);
+    }
+  };
+
+  const handleResetRoom = () => {
+    if (roomId) {
+      resetRoom(roomId);
     }
   };
 
@@ -300,6 +307,7 @@ export function Room() {
             onRollDice={handleRollDice}
             onRollDiceResult={handleRollDiceResult}
             onRequestReroll={handleRequestReroll}
+            onResetRoom={handleResetRoom}
           />
         </Box>
       </Flex>
