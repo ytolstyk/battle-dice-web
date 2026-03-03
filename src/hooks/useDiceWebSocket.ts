@@ -198,16 +198,18 @@ export function useDiceWebSocket() {
     socket.on("diceRolled", setRoom);
     socket.on("rollResult", setRoom);
     socket.on("userNameUpdated", setRoom);
+    socket.on("rerollRequested", setRoom);
 
     return () => {
       leaveRoom(room?.id ?? "");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.on("roomUpdated", setRoom);
-      socket.on("diceRulesUpdated", setRoom);
+      socket.off("roomUpdated", setRoom);
+      socket.off("diceRulesUpdated", setRoom);
       socket.off("diceRolled", setRoom);
       socket.off("rollResult", setRoom);
       socket.off("userNameUpdated", setRoom);
+      socket.off("rerollRequested", setRoom);
       socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

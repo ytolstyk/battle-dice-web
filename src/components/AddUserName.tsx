@@ -3,12 +3,7 @@ import { useContext, useState } from "react";
 import { UserContext } from "./UserContext";
 import { modals } from "@mantine/modals";
 
-type Props = {
-  updateUserName: (roomId: string, name: string) => void;
-  roomId: string;
-};
-
-export function AddUserName({ updateUserName, roomId }: Props) {
+export function AddUserName() {
   const { saveUserName } = useContext(UserContext);
   const [name, setName] = useState("Drama Llama");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -28,8 +23,6 @@ export function AddUserName({ updateUserName, roomId }: Props) {
     }
 
     saveUserName(name);
-    updateUserName(roomId, name);
-
     modals.closeAll();
   };
 

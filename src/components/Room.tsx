@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { DiceTray } from "./DiceTray";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { OpponentTray } from "./OpponentTray";
 import {
   Box,
@@ -46,22 +46,25 @@ export function Room() {
     leaveRoom,
     updateDiceRules,
     updateUserRollResult,
-    updateUserName,
     rollDice,
   } = useDiceWebSocket();
 
+  const hasJoinedRef = useRef(false);
+
   useEffect(() => {
-    if (roomId && isConnected) {
+    if (roomId && isConnected && userName && !hasJoinedRef.current) {
+      hasJoinedRef.current = true;
       joinRoom(roomId);
     }
 
     return () => {
+      hasJoinedRef.current = false;
       if (roomId) {
         leaveRoom(roomId);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, roomId]);
+  }, [isConnected, roomId, userName]);
 
   useEffect(() => {
     const isNewRoom = searchParams.get("new") === "true";
@@ -83,13 +86,11 @@ export function Room() {
     if (!userName && roomId) {
       modals.open({
         title: "Enter your name",
-        children: (
-          <AddUserName updateUserName={updateUserName} roomId={roomId} />
-        ),
+        children: <AddUserName />,
         size: "md",
       });
     }
-  }, [roomId, userName, updateUserName]);
+  }, [roomId, userName]);
 
   useEffect(() => {
     if (roomId && throttledDiceCombination) {
