@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import BarcodeScanner from "react-qr-barcode-scanner";
 import { useNavigate } from "react-router-dom";
 import { regexTester, ROOM_ID_LENGTH } from "../helpers/idGenerator";
@@ -9,17 +9,31 @@ import styles from "./qtScanner.module.css";
 export function JoinRoomModal() {
   const [qrData, setQrData] = useState("");
   const [roomId, setRoomId] = useState("");
+  const [isFrozen, setIsFrozen] = useState(false);
+  const scannerContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  if (regexTester.test(qrData)) {
+  useEffect(() => {
+    if (isFrozen && scannerContainerRef.current) {
+      const video = scannerContainerRef.current.querySelector("video");
+      if (video) {
+        video.pause();
+      }
+    }
+  }, [isFrozen]);
+
+  if (regexTester.test(qrData) && !isFrozen) {
     const match = qrData.match(regexTester);
 
     if (!match) return null;
 
     const path = match[0];
 
-    navigate(path);
-    modals.closeAll();
+    setIsFrozen(true);
+    setTimeout(() => {
+      navigate(path);
+      modals.closeAll();
+    }, 500);
   }
 
   const checkAndNavigate = () => {
@@ -59,13 +73,18 @@ export function JoinRoomModal() {
         Scan the QR code to join a room
       </Text>
       <Box m="lg">
-        <Box className={styles["qr-scanner-container"]}>
+        <Box
+          ref={scannerContainerRef}
+          className={`${styles["qr-scanner-container"]} ${isFrozen ? styles.frozen : ""}`}
+        >
           <BarcodeScanner
             onUpdate={(_, result) => {
-              if (result) {
-                setQrData(result.getText());
-              } else {
-                setQrData("");
+              if (!isFrozen) {
+                if (result) {
+                  setQrData(result.getText());
+                } else {
+                  setQrData("");
+                }
               }
             }}
           />

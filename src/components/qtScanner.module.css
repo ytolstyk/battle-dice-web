@@ -2,12 +2,19 @@
   position: relative; /* Essential for positioning pseudo-elements */
   overflow: hidden;
   border-radius: 1rem;
+  transition: opacity 0.3s ease;
 
   & video {
     aspect-ratio: 1 / 1;
     width: 100%;
     display: block;
     object-fit: cover;
+  }
+}
+
+.frozen {
+  & video {
+    opacity: 0.8;
   }
 }
 
