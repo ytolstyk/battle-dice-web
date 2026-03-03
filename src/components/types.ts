@@ -8,13 +8,14 @@ export type RollResult = {
     sides: number;
     dieType: DieType;
     groupId: number;
-    rollId: number;
+    rollId: number | string;
     theme: string;
     themeColor: string;
     value: number;
   }[];
   id: number;
   value: number;
+  mods?: DieGroupMod[];
 };
 
 export type DiceResult = {

@@ -1,7 +1,7 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
-import { type RollResult, type Roll, type User } from "./types";
+import { type RollResult, type Roll, type User, type DieType } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
 import { Button, Center, Text, Paper, Flex } from "@mantine/core";
@@ -58,7 +58,8 @@ export function DiceTray({
         id: diceBoxId,
         assetPath: "/assets/",
         scale: 6,
-        onRollComplete: (results: RollResult[]) => {
+        onRollComplete: (rawResults) => {
+          const results = rawResults as RollResult[];
           const rerolls = drpRef.current.handleRerolls(results);
           if (rerolls.length > 0) {
             DiceBox.reroll(rerolls);
@@ -68,7 +69,7 @@ export function DiceTray({
           setIsDisabled(false);
           onRollDiceResult({
             diceResults: results.flatMap((group) =>
-              group.rolls.map((r) => ({ dieType: r.dieType, value: r.value })),
+              group.rolls.map((r) => ({ dieType: r.dieType as DieType, value: r.value })),
             ),
             total: finalResults.value,
           });
@@ -108,7 +109,7 @@ export function DiceTray({
     if (diceBoxInstance) {
       const color = getRandomDiceColor();
       const notation = drpRef.current.parseNotation(diceCombination || "").map(
-        (group: object) => ({ ...group, themeColor: color }),
+        (group) => ({ ...group, themeColor: color }),
       );
       diceBoxInstance.roll(notation);
       onRollDice();
