@@ -1,10 +1,11 @@
 import DiceBoxClass from "@3d-dice/dice-box";
 import DiceParser from "@3d-dice/dice-parser-interface";
 import { useEffect, useRef, useState } from "react";
+import confetti from "canvas-confetti";
 import { type RollResult, type Roll, type User, type DieType } from "./types";
 import styles from "./diceTray.module.css";
 import "./styles.css";
-import { Button, Center, Text, Paper, Flex } from "@mantine/core";
+import { Button, Text, Paper, Flex } from "@mantine/core";
 import { IconLaurelWreath } from "@tabler/icons-react";
 
 const DICE_COLORS = [
@@ -174,6 +175,17 @@ export function DiceTray({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!isWinner) return;
+    const end = Date.now() + 3000;
+    const frame = () => {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, [isWinner]);
+
   const handleRoll = () => {
     setIsDisabled(true);
 
@@ -222,45 +234,41 @@ export function DiceTray({
   ) : null;
 
   return (
-    <>
-      <Center mb="sm">
-        <Paper shadow="sm" withBorder>
-          <div
-            id={diceBoxId}
-            ref={diceBoxRef}
-            className={styles.diceBoxContainer}
-          >
-            <div className={styles.resultWrapper}>
-              <Flex align="center" pt="xs" pl="xs">
-                <Text size="xl" fw="bold" mr="xs">
-                  {roomUser?.name}
-                </Text>
-                {icon}
-              </Flex>
-              {renderResult()}
-            </div>
+    <Flex direction="column" h="100%" align="center" justify="center" gap="sm">
+      <Paper shadow="sm" withBorder>
+        <div
+          id={diceBoxId}
+          ref={diceBoxRef}
+          className={styles.diceBoxContainer}
+        >
+          <div className={styles.resultWrapper}>
+            <Flex align="center" pt="xs" pl="xs">
+              <Text size="xl" fw="bold" mr="xs">
+                {roomUser?.name}
+              </Text>
+              {icon}
+            </Flex>
+            {renderResult()}
           </div>
-        </Paper>
-      </Center>
-      <Center>
-        <Flex gap="sm">
-          <Button onClick={handleRoll} disabled={buttonDisabled}>
-            Roll{" "}
-            {diceCombination && diceCombination.length <= 10
-              ? diceCombination
-              : ""}
+        </div>
+      </Paper>
+      <Flex gap="sm">
+        <Button onClick={handleRoll} disabled={buttonDisabled}>
+          Roll{" "}
+          {diceCombination && diceCombination.length <= 10
+            ? diceCombination
+            : ""}
+        </Button>
+        {!isOwner && roomUser?.status === "hasRolled" && (
+          <Button
+            variant="light"
+            onClick={onRequestReroll}
+            disabled={!isConnected}
+          >
+            Request Reroll
           </Button>
-          {!isOwner && roomUser?.status === "hasRolled" && (
-            <Button
-              variant="light"
-              onClick={onRequestReroll}
-              disabled={!isConnected}
-            >
-              Request Reroll
-            </Button>
-          )}
-        </Flex>
-      </Center>
-    </>
+        )}
+      </Flex>
+    </Flex>
   );
 }

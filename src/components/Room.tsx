@@ -7,12 +7,10 @@ import {
   Button,
   Center,
   Flex,
-  Grid,
   Loader,
   LoadingOverlay,
   Paper,
   Popover,
-  SimpleGrid,
   Text,
   TextInput,
   Title,
@@ -52,6 +50,17 @@ export function Room() {
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
+  const diceTrayBoxRef = useRef<HTMLDivElement>(null);
+  const [diceTrayHeight, setDiceTrayHeight] = useState<number | undefined>();
+
+  useEffect(() => {
+    if (!diceTrayBoxRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setDiceTrayHeight(entry.contentRect.height);
+    });
+    observer.observe(diceTrayBoxRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (roomId && isConnected && userName && !hasJoinedRef.current) {
@@ -175,7 +184,7 @@ export function Room() {
       const isOwner = room.ownerId === userId;
 
       trays.push(
-        <Grid.Col key={player.id} span={{ base: 6, sm: 6, md: 4, lg: 3 }}>
+        <Box key={player.id} flex={1} maw={diceTrayHeight} h="100%">
           <OpponentTray
             player={player}
             isWinner={isWinner}
@@ -183,11 +192,22 @@ export function Room() {
             onApproveReroll={() => roomId && approveReroll(roomId, player.id)}
             onDeclineReroll={() => roomId && declineReroll(roomId, player.id)}
           />
-        </Grid.Col>,
+        </Box>,
       );
     }
 
-    return <Grid justify="center">{trays}</Grid>;
+    return (
+      <Flex
+        h="100%"
+        wrap="nowrap"
+        align="center"
+        justify="center"
+        gap="md"
+        p="xs"
+      >
+        {trays}
+      </Flex>
+    );
   }
 
   function renderDiceRules() {
@@ -225,10 +245,18 @@ export function Room() {
   const isWinner = winners.map((u) => u.id).includes(userId);
 
   return (
-    <Box pos="relative">
+    <Box
+      pos="relative"
+      style={{
+        height:
+          "calc(100dvh - var(--app-shell-header-height) - var(--app-shell-padding) * 2)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <LoadingOverlay
         visible={!isConnected}
-        zIndex={1000}
+        zIndex={99}
         overlayProps={{ radius: "sm", blur: 2 }}
         loaderProps={{
           children: (
@@ -239,24 +267,30 @@ export function Room() {
           ),
         }}
       />
-      <Flex align="center" justify="center">
-        <Title order={2} ta="center" mr="sm">
-          Room {roomId}{" "}
-        </Title>
-        <UnstyledButton onClick={handleShareClick} display="flex">
-          <IconShare
-            size={30}
-            stroke={2}
-            color="var(--mantine-color-blue-filled)"
-          />
-        </UnstyledButton>
-      </Flex>
-      <Center mt="sm" mb="sm">
-        {renderDiceRules()}
-      </Center>
-      <SimpleGrid cols={1}>
-        <Box>{renderDiceTrays()}</Box>
-        <Box h="40vh">
+
+      <Box>
+        <Flex align="center" justify="center">
+          <Title order={2} ta="center" mr="sm">
+            Room {roomId}{" "}
+          </Title>
+          <UnstyledButton onClick={handleShareClick} display="flex">
+            <IconShare
+              size={30}
+              stroke={2}
+              color="var(--mantine-color-blue-filled)"
+            />
+          </UnstyledButton>
+        </Flex>
+        <Center mt="sm" mb="sm">
+          {renderDiceRules()}
+        </Center>
+      </Box>
+
+      <Flex direction="column" flex={1} style={{ minHeight: 0 }}>
+        <Box flex={1} style={{ overflow: "auto", minHeight: 0 }}>
+          {renderDiceTrays()}
+        </Box>
+        <Box flex={1} ref={diceTrayBoxRef}>
           <DiceTray
             isConnected={isConnected}
             isOwner={room?.ownerId === userId}
@@ -268,7 +302,7 @@ export function Room() {
             onRequestReroll={handleRequestReroll}
           />
         </Box>
-      </SimpleGrid>
+      </Flex>
     </Box>
   );
 }

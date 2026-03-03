@@ -11,7 +11,8 @@ import {
   IconSquareCheck,
   IconSquareX,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import confetti from "canvas-confetti";
 
 type Props = {
   player: User;
@@ -33,6 +34,20 @@ const ICON_MAP = [
 export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDeclineReroll }: Props) {
   const [iconIndex, setIconIndex] = useState(0);
   const hasResults = player.roll.total && player.roll.diceResults.length > 0;
+  const paperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isWinner || !paperRef.current) return;
+    const rect = paperRef.current.getBoundingClientRect();
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+    const end = Date.now() + 3000;
+    const frame = () => {
+      confetti({ particleCount: 4, spread: 60, origin: { x, y }, startVelocity: 20, ticks: 80 });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, [isWinner]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -99,7 +114,7 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
   ) : null;
 
   return (
-    <Paper withBorder shadow="md" p="md" mih="10rem">
+    <Paper ref={paperRef} withBorder shadow="md" p="md" h="100%">
       <Box
         p="xs"
         mb="xs"
