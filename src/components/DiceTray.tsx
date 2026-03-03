@@ -191,6 +191,8 @@ export function DiceTray({
     };
     frame();
 
+    navigator.vibrate?.([100, 50, 100, 50, 300]);
+
     document.body.classList.add("screen-shake");
     const timer = setTimeout(
       () => document.body.classList.remove("screen-shake"),
