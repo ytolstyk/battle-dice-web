@@ -7,6 +7,8 @@ import styles from "./diceTray.module.css";
 import "./styles.css";
 import { Button, Text, Paper, Flex } from "@mantine/core";
 import { IconLaurelWreath } from "@tabler/icons-react";
+import { modals } from "@mantine/modals";
+import { AddUserName } from "./AddUserName";
 
 const DICE_COLORS = [
   "#e74c3c",
@@ -296,6 +298,14 @@ export function DiceTray({
   buttonDisabledRef.current = buttonDisabled;
   handleRollRef.current = handleRoll;
 
+  const handleEditName = () => {
+    modals.open({
+      title: "Edit Your Name",
+      children: <AddUserName />,
+      size: "md",
+    });
+  };
+
   const icon = isWinner ? (
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;
@@ -320,6 +330,9 @@ export function DiceTray({
         </div>
       </Paper>
       <Flex gap="sm">
+        <Button variant="light" onClick={handleEditName}>
+          Edit Name
+        </Button>
         <Button onClick={handleRoll} disabled={buttonDisabled}>
           Roll{" "}
           {diceCombination && diceCombination.length <= 10

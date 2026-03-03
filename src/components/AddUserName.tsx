@@ -4,8 +4,8 @@ import { UserContext } from "./UserContext";
 import { modals } from "@mantine/modals";
 
 export function AddUserName() {
-  const { saveUserName } = useContext(UserContext);
-  const [name, setName] = useState("Drama Llama");
+  const { saveUserName, userName } = useContext(UserContext);
+  const [name, setName] = useState(userName || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
