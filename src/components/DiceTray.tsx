@@ -186,6 +186,13 @@ export function DiceTray({
       if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
+
+    document.body.classList.add("screen-shake");
+    const timer = setTimeout(
+      () => document.body.classList.remove("screen-shake"),
+      600,
+    );
+    return () => clearTimeout(timer);
   }, [isWinner]);
 
   const handleRoll = () => {
