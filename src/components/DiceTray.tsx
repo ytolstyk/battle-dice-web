@@ -122,6 +122,10 @@ export function DiceTray({
   const diceBoxRef = useRef<HTMLDivElement>(null);
   const [diceBoxInstance, setDiceBoxInstance] = useState<DiceBoxClass>();
 
+  const buttonDisabledRef = useRef(false);
+  const handleRollRef = useRef<() => void>();
+  const motionPermissionRef = useRef(false);
+
   useEffect(() => {
     if (diceBoxRef.current) {
       const DiceBox = new DiceBoxClass({
@@ -195,7 +199,54 @@ export function DiceTray({
     return () => clearTimeout(timer);
   }, [isWinner]);
 
+  useEffect(() => {
+    const THRESHOLD = 15;
+    const COOLDOWN_MS = 1500;
+    let lastX = 0,
+      lastY = 0,
+      lastZ = 0;
+    let lastShakeTime = 0;
+
+    const handleMotion = (event: DeviceMotionEvent) => {
+      if (buttonDisabledRef.current) return;
+      const acc = event.accelerationIncludingGravity;
+      if (!acc) return;
+
+      const now = Date.now();
+      const deltaX = Math.abs((acc.x ?? 0) - lastX);
+      const deltaY = Math.abs((acc.y ?? 0) - lastY);
+      const deltaZ = Math.abs((acc.z ?? 0) - lastZ);
+
+      lastX = acc.x ?? 0;
+      lastY = acc.y ?? 0;
+      lastZ = acc.z ?? 0;
+
+      if (
+        (deltaX > THRESHOLD || deltaY > THRESHOLD || deltaZ > THRESHOLD) &&
+        now - lastShakeTime > COOLDOWN_MS
+      ) {
+        lastShakeTime = now;
+        handleRollRef.current?.();
+      }
+    };
+
+    window.addEventListener("devicemotion", handleMotion);
+    return () => window.removeEventListener("devicemotion", handleMotion);
+  }, []);
+
   const handleRoll = () => {
+    // Request iOS motion permission on first user gesture
+    if (
+      !motionPermissionRef.current &&
+      typeof DeviceMotionEvent !== "undefined" &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      typeof (DeviceMotionEvent as any).requestPermission === "function"
+    ) {
+      motionPermissionRef.current = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (DeviceMotionEvent as any).requestPermission().catch(() => {});
+    }
+
     setIsDisabled(true);
 
     if (diceBoxInstance) {
@@ -238,6 +289,11 @@ export function DiceTray({
     isDisabled ||
     roomUser?.status !== "connected" ||
     !diceCombination;
+
+  // Keep refs in sync for use inside the motion event listener
+  buttonDisabledRef.current = buttonDisabled;
+  handleRollRef.current = handleRoll;
+
   const icon = isWinner ? (
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;
