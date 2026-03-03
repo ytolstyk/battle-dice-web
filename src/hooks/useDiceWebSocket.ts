@@ -1,7 +1,15 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { socket } from "../helpers/socket";
 import { type Room, type ConnectingUser, type Roll } from "../components/types";
 import { UserContext } from "../components/UserContext";
+import { notifications } from "@mantine/notifications";
 
 export function useDiceWebSocket() {
   const { userName, userId } = useContext(UserContext);
@@ -28,6 +36,34 @@ export function useDiceWebSocket() {
 
     return null;
   }, [userId, room]);
+
+  const prevParticipantIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!room) return;
+
+    const currentIds = new Set(room.participants.map((u) => u.id));
+    console.log("Current participant IDs:", currentIds);
+    for (const participant of room.participants) {
+      if (
+        participant.id !== userId &&
+        !prevParticipantIdsRef.current.has(participant.id) &&
+        prevParticipantIdsRef.current.size > 0
+      ) {
+        console.log(
+          `New participant joined: ${participant.name} (ID: ${participant.id})`,
+        );
+        notifications.show({
+          title: "Player joined",
+          message: `${participant.name || "Someone"} joined the room`,
+          color: "blue",
+          autoClose: 4000,
+        });
+      }
+    }
+
+    prevParticipantIdsRef.current = currentIds;
+  }, [room, userId]);
 
   const joinRoom = useCallback(
     (roomId: string) => {
