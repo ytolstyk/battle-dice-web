@@ -15,7 +15,7 @@ No test suite is configured.
 
 ## Architecture
 
-This is a React + TypeScript SPA (Vite) for a real-time multiplayer dice-rolling game called "Battle Dice."
+This is a React + TypeScript SPA (Vite) for a real-time multiplayer dice-rolling game called "Dice Battles."
 
 ### Data Flow
 
@@ -54,3 +54,12 @@ Only the room owner (`room.ownerId === userId`) can change `diceRules`. The dice
 - `__COMMIT_HASH__` is injected at build time via `vite.config.ts` (uses `git rev-parse --short HEAD`) and written to a meta tag in `<head>`.
 - WASM support requires `vite-plugin-wasm` and `vite-plugin-top-level-await`.
 - Styles use Mantine's PostCSS preset (`postcss-preset-mantine`, `postcss-simple-vars`).
+
+### Validations
+
+Before finishing any task, run the following commands:
+
+1. **Lint:** `npm run lint`
+2. **Types:** `npm run type-check`
+
+If any command fails, fix the issue before submitting.

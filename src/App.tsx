@@ -22,7 +22,7 @@ export function App() {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <Group justify="space-between" style={{ flex: 1 }}>
-            <Title order={3}>Battle Dice</Title>
+            <Title order={3}>Dice Battles</Title>
             <Group ml="xl" gap={0} visibleFrom="sm">
               <Link to="/" onClick={close}>
                 <Text p="md">Lobby</Text>

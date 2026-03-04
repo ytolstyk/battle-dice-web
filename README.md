@@ -1,4 +1,4 @@
-# Battle Dice
+# Dice Battles
 
 A real-time multiplayer dice-rolling game played in the browser. Why settle disputes with words when you can roll dice? Players join a shared room, roll 3D dice simultaneously, and the highest total wins.
 
@@ -21,13 +21,13 @@ A real-time multiplayer dice-rolling game played in the browser. Why settle disp
 
 ## Dice Notation
 
-| Example | Meaning |
-|---|---|
-| `2d6` | Roll two 6-sided dice |
+| Example      | Meaning                         |
+| ------------ | ------------------------------- |
+| `2d6`        | Roll two 6-sided dice           |
 | `1d20 + 2d4` | Roll a d20 and two d4s, sum all |
-| `4d6kh3` | Roll 4d6, keep highest 3 |
-| `2d6kl1` | Roll 2d6, keep lowest 1 |
-| `1d6!` | Roll a d6, explode on max |
+| `4d6kh3`     | Roll 4d6, keep highest 3        |
+| `2d6kl1`     | Roll 2d6, keep lowest 1         |
+| `1d6!`       | Roll a d6, explode on max       |
 
 ## Development
 
