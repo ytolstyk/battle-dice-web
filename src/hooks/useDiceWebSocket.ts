@@ -11,6 +11,28 @@ import { type Room, type ConnectingUser, type Roll } from "../components/types";
 import { UserContext } from "../components/UserContext";
 import { notifications } from "@mantine/notifications";
 
+function isValidRoom(data: unknown): data is Room {
+  if (!data || typeof data !== "object") return false;
+  const r = data as Record<string, unknown>;
+  return (
+    typeof r.id === "string" &&
+    r.id.length > 0 &&
+    typeof r.ownerId === "string" &&
+    r.ownerId.length > 0 &&
+    typeof r.diceRules === "string" &&
+    Array.isArray(r.participants)
+  );
+}
+
+function showError(message: string) {
+  notifications.show({
+    title: "Error",
+    message,
+    color: "red",
+    autoClose: 5000,
+  });
+}
+
 export function useDiceWebSocket() {
   const { userName, userId } = useContext(UserContext);
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -30,6 +52,14 @@ export function useDiceWebSocket() {
 
   function onDisconnect() {
     setIsConnected(false);
+  }
+
+  function safeSetRoom(data: unknown) {
+    if (isValidRoom(data)) {
+      setRoom(data);
+    } else {
+      console.warn("Received invalid Room payload from server:", data);
+    }
   }
 
   const roomUser = useMemo(() => {
@@ -79,6 +109,11 @@ export function useDiceWebSocket() {
 
   const joinRoom = useCallback(
     (roomId: string) => {
+      if (!roomId || !userId) {
+        showError("Cannot join room: missing room ID or user ID.");
+        return;
+      }
+
       setIsLoading(true);
 
       const payload = {
@@ -90,12 +125,12 @@ export function useDiceWebSocket() {
         setIsLoading(false);
       });
     },
-    [connectingUser],
+    [connectingUser, userId],
   );
 
   const leaveRoom = useCallback(
     (roomId: string) => {
-      if (!room || !roomId) {
+      if (!room || !roomId || !userId) {
         return;
       }
 
@@ -119,6 +154,10 @@ export function useDiceWebSocket() {
         return;
       }
 
+      if (!roomId || !diceRules.trim()) {
+        return;
+      }
+
       const payload = {
         roomId,
         userId,
@@ -132,6 +171,11 @@ export function useDiceWebSocket() {
 
   const rollDice = useCallback(
     (roomId: string) => {
+      if (!roomId || !userId) {
+        showError("Cannot roll dice: missing room ID or user ID.");
+        return;
+      }
+
       const payload = {
         roomId,
         userId,
@@ -144,6 +188,19 @@ export function useDiceWebSocket() {
 
   const updateUserRollResult = useCallback(
     (roomId: string, rollResult: Roll) => {
+      if (!roomId || !userId) {
+        showError("Cannot submit roll result: missing room ID or user ID.");
+        return;
+      }
+
+      if (
+        !Array.isArray(rollResult.diceResults) ||
+        typeof rollResult.total !== "number"
+      ) {
+        showError("Cannot submit roll result: invalid roll data.");
+        return;
+      }
+
       const payload = {
         roomId,
         userId,
@@ -179,6 +236,10 @@ export function useDiceWebSocket() {
 
   const requestReroll = useCallback(
     (roomId: string) => {
+      if (!roomId || !userId) {
+        showError("Cannot request reroll: missing room ID or user ID.");
+        return;
+      }
       socket.emit("requestReroll", { roomId, userId });
     },
     [userId],
@@ -186,6 +247,10 @@ export function useDiceWebSocket() {
 
   const approveReroll = useCallback(
     (roomId: string, targetUserId: string) => {
+      if (!roomId || !userId || !targetUserId) {
+        showError("Cannot approve reroll: missing required fields.");
+        return;
+      }
       socket.emit("approveReroll", { roomId, userId, targetUserId });
     },
     [userId],
@@ -193,6 +258,10 @@ export function useDiceWebSocket() {
 
   const declineReroll = useCallback(
     (roomId: string, targetUserId: string) => {
+      if (!roomId || !userId || !targetUserId) {
+        showError("Cannot decline reroll: missing required fields.");
+        return;
+      }
       socket.emit("declineReroll", { roomId, userId, targetUserId });
     },
     [userId],
@@ -200,6 +269,16 @@ export function useDiceWebSocket() {
 
   const updateUserName = useCallback(
     (roomId: string, name: string) => {
+      if (!roomId || !userId) {
+        showError("Cannot update username: missing room ID or user ID.");
+        return;
+      }
+
+      if (!name.trim()) {
+        showError("Cannot update username: name cannot be empty.");
+        return;
+      }
+
       const payload = {
         roomId,
         userId,
@@ -217,6 +296,11 @@ export function useDiceWebSocket() {
         return;
       }
 
+      if (!roomId || !userId) {
+        showError("Cannot reset room: missing room ID or user ID.");
+        return;
+      }
+
       socket.emit("resetRoom", { roomId, userId });
     },
     [userId, room?.ownerId],
@@ -227,25 +311,29 @@ export function useDiceWebSocket() {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("roomUpdated", setRoom);
-    socket.on("diceRulesUpdated", setRoom);
-    socket.on("diceRolled", setRoom);
-    socket.on("rollResult", setRoom);
-    socket.on("userNameUpdated", setRoom);
-    socket.on("rerollRequested", setRoom);
-    socket.on("rerollResolved", setRoom);
+    socket.on("connect_error", (err) => {
+      showError(`Connection failed: ${err.message}`);
+    });
+    socket.on("roomUpdated", safeSetRoom);
+    socket.on("diceRulesUpdated", safeSetRoom);
+    socket.on("diceRolled", safeSetRoom);
+    socket.on("rollResult", safeSetRoom);
+    socket.on("userNameUpdated", safeSetRoom);
+    socket.on("rerollRequested", safeSetRoom);
+    socket.on("rerollResolved", safeSetRoom);
 
     return () => {
       leaveRoom(roomRef.current?.id ?? "");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("roomUpdated", setRoom);
-      socket.off("diceRulesUpdated", setRoom);
-      socket.off("diceRolled", setRoom);
-      socket.off("rollResult", setRoom);
-      socket.off("userNameUpdated", setRoom);
-      socket.off("rerollRequested", setRoom);
-      socket.off("rerollResolved", setRoom);
+      socket.off("connect_error");
+      socket.off("roomUpdated", safeSetRoom);
+      socket.off("diceRulesUpdated", safeSetRoom);
+      socket.off("diceRolled", safeSetRoom);
+      socket.off("rollResult", safeSetRoom);
+      socket.off("userNameUpdated", safeSetRoom);
+      socket.off("rerollRequested", safeSetRoom);
+      socket.off("rerollResolved", safeSetRoom);
       socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
