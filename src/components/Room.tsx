@@ -150,7 +150,7 @@ export function Room() {
   function renderDiceTrays() {
     if (!room || room.participants.length < 2) {
       return (
-        <Center>
+        <Center h="100%">
           <Paper
             withBorder
             shadow="md"
@@ -284,12 +284,12 @@ export function Room() {
             />
           </UnstyledButton>
         </Flex>
-        <Center mt="sm" mb="sm">
+        <Center mt="sm" mb="sm" h="auto">
           {renderDiceRules()}
         </Center>
       </Box>
 
-      <Flex direction="column" flex={1} style={{ minHeight: 0 }}>
+      <Flex direction="column" flex={1} style={{ minHeight: 0 }} gap="1rem">
         <Box flex={1} style={{ overflow: "auto", minHeight: 0 }}>
           {renderDiceTrays()}
         </Box>
