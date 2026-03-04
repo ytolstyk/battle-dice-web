@@ -125,7 +125,7 @@ export function DiceTray({
   const [diceBoxInstance, setDiceBoxInstance] = useState<DiceBoxClass>();
 
   const buttonDisabledRef = useRef(false);
-  const handleRollRef = useRef<() => void>();
+  const handleRollRef = useRef<() => void>(null);
   const motionPermissionRef = useRef(false);
 
   useEffect(() => {
