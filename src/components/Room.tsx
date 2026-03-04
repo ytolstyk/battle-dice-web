@@ -52,17 +52,6 @@ export function Room() {
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
-  const diceTrayBoxRef = useRef<HTMLDivElement>(null);
-  const [diceTrayHeight, setDiceTrayHeight] = useState<number | undefined>();
-
-  useEffect(() => {
-    if (!diceTrayBoxRef.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setDiceTrayHeight(entry.contentRect.height);
-    });
-    observer.observe(diceTrayBoxRef.current);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     if (roomId && isConnected && userName && !hasJoinedRef.current) {
@@ -198,7 +187,7 @@ export function Room() {
       const isOwner = room.ownerId === userId;
 
       trays.push(
-        <Box key={player.id} flex={1} maw={diceTrayHeight} h="100%">
+        <Box key={player.id} flex={1} maw="20rem" h="100%">
           <OpponentTray
             player={player}
             isWinner={isWinner}
@@ -304,7 +293,7 @@ export function Room() {
         <Box flex={1} style={{ overflow: "auto", minHeight: 0 }}>
           {renderDiceTrays()}
         </Box>
-        <Box flex={1} ref={diceTrayBoxRef}>
+        <Box flex={1}>
           <DiceTray
             isConnected={isConnected}
             isOwner={room?.ownerId === userId}

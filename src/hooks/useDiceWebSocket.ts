@@ -15,7 +15,10 @@ export function useDiceWebSocket() {
   const { userName, userId } = useContext(UserContext);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [room, setRoom] = useState<Room | null>(null);
+  const roomRef = useRef<Room | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  roomRef.current = room;
 
   const connectingUser = useMemo(() => {
     return { id: userId, name: userName } as ConnectingUser;
@@ -233,7 +236,7 @@ export function useDiceWebSocket() {
     socket.on("rerollResolved", setRoom);
 
     return () => {
-      leaveRoom(room?.id ?? "");
+      leaveRoom(roomRef.current?.id ?? "");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("roomUpdated", setRoom);

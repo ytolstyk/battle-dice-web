@@ -178,11 +178,14 @@ export function DiceTray({
       });
     }
 
+    const container = diceBoxRef.current;
     return () => {
-      // remove the canvas + listeners
-      Array.from(document.getElementsByClassName("dice-box-canvas")).forEach(
-        (el) => el.remove(),
-      );
+      // remove the canvas + listeners scoped to this component's container
+      if (container) {
+        Array.from(
+          container.getElementsByClassName("dice-box-canvas"),
+        ).forEach((el) => el.remove());
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

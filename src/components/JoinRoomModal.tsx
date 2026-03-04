@@ -14,45 +14,43 @@ export function JoinRoomModal() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isFrozen && scannerContainerRef.current) {
-      const video = scannerContainerRef.current.querySelector("video");
-      if (video) {
-        video.pause();
-      }
-    }
-  }, [isFrozen]);
-
-  if (regexTester.test(qrData) && !isFrozen) {
     const match = qrData.match(regexTester);
-
-    if (!match) return null;
+    if (!match) return;
 
     const path = match[0];
 
-    setIsFrozen(true);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      setIsFrozen(true);
       navigate(path);
       modals.closeAll();
     }, 500);
-  }
 
-  const checkAndNavigate = () => {
-    if (`/rooms/${roomId}`.match(regexTester)) {
-      navigate(`/rooms/${roomId}`);
+    return () => clearTimeout(timer);
+  }, [qrData, navigate]);
+
+  useEffect(() => {
+    if (isFrozen && scannerContainerRef.current) {
+      const video = scannerContainerRef.current.querySelector("video");
+      video?.pause();
+    }
+  }, [isFrozen]);
+
+  const checkAndNavigate = (value: string) => {
+    if (`/rooms/${value}`.match(regexTester)) {
+      navigate(`/rooms/${value}`);
       modals.closeAll();
     }
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRoomId(event.target.value);
-
-    checkAndNavigate();
+    const value = event.target.value;
+    setRoomId(value);
+    checkAndNavigate(value);
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
-    checkAndNavigate();
+    checkAndNavigate(roomId);
   };
 
   return (

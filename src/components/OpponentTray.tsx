@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Flex, Paper, Text } from "@mantine/core";
+import { ActionIcon, Flex, Paper, Text } from "@mantine/core";
 import type { User } from "./types";
 import {
   IconDice6,
@@ -31,7 +31,13 @@ const ICON_MAP = [
   IconDice6,
 ];
 
-export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDeclineReroll }: Props) {
+export function OpponentTray({
+  player,
+  isWinner,
+  isOwner,
+  onApproveReroll,
+  onDeclineReroll,
+}: Props) {
   const [iconIndex, setIconIndex] = useState(0);
   const hasResults = player.roll.total && player.roll.diceResults.length > 0;
   const paperRef = useRef<HTMLDivElement>(null);
@@ -43,7 +49,13 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
     const y = (rect.top + rect.height / 2) / window.innerHeight;
     const end = Date.now() + 3000;
     const frame = () => {
-      confetti({ particleCount: 4, spread: 60, origin: { x, y }, startVelocity: 20, ticks: 80 });
+      confetti({
+        particleCount: 4,
+        spread: 60,
+        origin: { x, y },
+        startVelocity: 20,
+        ticks: 80,
+      });
       if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
@@ -76,9 +88,13 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
 
     return (
       <>
-        <Text style={{ maxHeight: "4rem", overflowY: "auto" }}>{text}</Text>
+        <Text flex={1} style={{ overflowY: "auto" }}>
+          {text}
+        </Text>
         {player.roll.modDescription && (
-          <Text size="xs" c="dimmed">{player.roll.modDescription}</Text>
+          <Text size="xs" c="dimmed">
+            {player.roll.modDescription}
+          </Text>
         )}
         <Text fw="bold">Result: {player.roll.total}</Text>
       </>
@@ -99,29 +115,45 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
     <IconLaurelWreath size={24} color="var(--mantine-color-blue-filled)" />
   ) : null;
 
-  const rerollRequest = isOwner && player.status === "requestedReroll" ? (
-    <Flex direction="column" align="flex-end" gap={2}>
-      <Text size="xs" c="dimmed">Approve reroll?</Text>
-      <Flex gap={4}>
-        <ActionIcon color="green" variant="subtle" size="sm" onClick={onApproveReroll}>
-          <IconSquareCheck size={18} />
-        </ActionIcon>
-        <ActionIcon color="red" variant="subtle" size="sm" onClick={onDeclineReroll}>
-          <IconSquareX size={18} />
-        </ActionIcon>
+  const rerollRequest =
+    isOwner && player.status === "requestedReroll" ? (
+      <Flex direction="column" align="flex-end" gap={2}>
+        <Text size="xs" c="dimmed">
+          Approve reroll?
+        </Text>
+        <Flex gap={4}>
+          <ActionIcon
+            color="green"
+            variant="subtle"
+            size="sm"
+            onClick={onApproveReroll}
+          >
+            <IconSquareCheck size={18} />
+          </ActionIcon>
+          <ActionIcon
+            color="red"
+            variant="subtle"
+            size="sm"
+            onClick={onDeclineReroll}
+          >
+            <IconSquareX size={18} />
+          </ActionIcon>
+        </Flex>
       </Flex>
-    </Flex>
-  ) : null;
+    ) : null;
 
   return (
-    <Paper ref={paperRef} withBorder shadow="md" p="md" h="100%">
-      <Box
+    <Paper withBorder shadow="md" p="md" h="100%">
+      <Flex
         p="xs"
         mb="xs"
         style={{
-          backgroundColor: "color-mix(in srgb, var(--mantine-color-body) 50%, transparent)",
+          backgroundColor:
+            "color-mix(in srgb, var(--mantine-color-body) 50%, transparent)",
           borderRadius: "var(--mantine-radius-sm)",
         }}
+        direction="column"
+        h="100%"
       >
         <Flex align="center" mb={hasResults ? "xs" : 0}>
           <Text size="xl" fw="bold" inline mr="xs">
@@ -133,7 +165,7 @@ export function OpponentTray({ player, isWinner, isOwner, onApproveReroll, onDec
           {rerollRequest}
         </Flex>
         {renderResult()}
-      </Box>
+      </Flex>
     </Paper>
   );
 }
