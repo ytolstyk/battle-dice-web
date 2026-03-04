@@ -3,7 +3,11 @@ import { useContext, useState } from "react";
 import { UserContext } from "./UserContext";
 import { modals } from "@mantine/modals";
 
-export function AddUserName() {
+type Props = {
+  onNameSaved?: (name: string) => void;
+};
+
+export function AddUserName({ onNameSaved }: Props) {
   const { saveUserName, userName } = useContext(UserContext);
   const [name, setName] = useState(userName || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -23,6 +27,7 @@ export function AddUserName() {
     }
 
     saveUserName(name);
+    onNameSaved?.(name);
     modals.closeAll();
   };
 

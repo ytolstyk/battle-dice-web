@@ -48,6 +48,7 @@ export function Room() {
     approveReroll,
     declineReroll,
     resetRoom,
+    updateUserName,
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
@@ -148,6 +149,12 @@ export function Room() {
   const handleResetRoom = () => {
     if (roomId) {
       resetRoom(roomId);
+    }
+  };
+
+  const handleUpdateUserName = (name: string) => {
+    if (roomId) {
+      updateUserName(roomId, name);
     }
   };
 
@@ -304,10 +311,12 @@ export function Room() {
             diceCombination={room?.diceRules}
             isWinner={isWinner}
             roomUser={roomUser}
+            roomId={roomId}
             onRollDice={handleRollDice}
             onRollDiceResult={handleRollDiceResult}
             onRequestReroll={handleRequestReroll}
             onResetRoom={handleResetRoom}
+            onUpdateUserName={handleUpdateUserName}
           />
         </Box>
       </Flex>

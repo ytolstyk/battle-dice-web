@@ -99,10 +99,12 @@ type Props = {
   isOwner: boolean;
   isWinner: boolean;
   roomUser?: User | null;
+  roomId?: string;
   onRollDice: () => void;
   onRollDiceResult: (roll: Roll) => void;
   onRequestReroll: () => void;
   onResetRoom: () => void;
+  onUpdateUserName?: (name: string) => void;
 };
 
 export function DiceTray({
@@ -111,10 +113,12 @@ export function DiceTray({
   isConnected,
   isOwner,
   roomUser,
+  roomId,
   onRollDice,
   onRollDiceResult,
   onRequestReroll,
   onResetRoom,
+  onUpdateUserName,
 }: Props) {
   const drpRef = useRef(new DiceParser());
   const modDescriptionRef = useRef("");
@@ -301,7 +305,15 @@ export function DiceTray({
   const handleEditName = () => {
     modals.open({
       title: "Edit Your Name",
-      children: <AddUserName />,
+      children: (
+        <AddUserName
+          onNameSaved={(name) => {
+            if (roomId && onUpdateUserName) {
+              onUpdateUserName(name);
+            }
+          }}
+        />
+      ),
       size: "md",
     });
   };

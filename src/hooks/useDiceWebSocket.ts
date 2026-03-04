@@ -203,7 +203,6 @@ export function useDiceWebSocket() {
         userName: name,
       };
 
-      console.log("sending user name");
       socket.emit("updateUserName", payload);
     },
     [userId],
