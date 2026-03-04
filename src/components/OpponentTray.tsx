@@ -143,7 +143,7 @@ export function OpponentTray({
     ) : null;
 
   return (
-    <Paper withBorder shadow="md" p="md" h="100%">
+    <Paper ref={paperRef} withBorder shadow="md" p="md" h="100%">
       <Flex
         p="xs"
         mb="xs"
