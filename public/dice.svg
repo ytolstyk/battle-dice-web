@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Dice cube with visible faces -->
+  <!-- Top face (white/light) -->
+  <path d="M 20 30 L 50 10 L 80 30 L 50 50 Z" fill="#ffffff" stroke="#000" stroke-width="1.5"/>
+
+  <!-- Left face (darker) -->
+  <path d="M 20 30 L 50 50 L 50 90 L 20 70 Z" fill="#e0e0e0" stroke="#000" stroke-width="1.5"/>
+
+  <!-- Right face (darkest) -->
+  <path d="M 50 50 L 80 30 L 80 70 L 50 90 Z" fill="#b0b0b0" stroke="#000" stroke-width="1.5"/>
+
+  <!-- Dots on top face (6) -->
+  <circle cx="30" cy="25" r="3" fill="#000"/>
+  <circle cx="30" cy="40" r="3" fill="#000"/>
+  <circle cx="50" cy="20" r="3" fill="#000"/>
+  <circle cx="50" cy="40" r="3" fill="#000"/>
+  <circle cx="70" cy="25" r="3" fill="#000"/>
+  <circle cx="70" cy="40" r="3" fill="#000"/>
+
+  <!-- Dots on left face (4) -->
+  <circle cx="28" cy="40" r="2.5" fill="#000"/>
+  <circle cx="28" cy="60" r="2.5" fill="#000"/>
+  <circle cx="42" cy="40" r="2.5" fill="#000"/>
+  <circle cx="42" cy="60" r="2.5" fill="#000"/>
+
+  <!-- Dots on right face (5) -->
+  <circle cx="57" cy="35" r="2.5" fill="#000"/>
+  <circle cx="57" cy="55" r="2.5" fill="#000"/>
+  <circle cx="65" cy="45" r="2.5" fill="#000"/>
+  <circle cx="73" cy="35" r="2.5" fill="#000"/>
+  <circle cx="73" cy="55" r="2.5" fill="#000"/>
+</svg>
