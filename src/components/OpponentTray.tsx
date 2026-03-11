@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Flex, Paper, Text } from "@mantine/core";
+import { ActionIcon, Flex, Paper, Text } from "@mantine/core";
 import type { DiceResult, User } from "./types";
 import {
   IconLaurelWreath,
@@ -31,30 +31,98 @@ function parseDiceTypes(diceRules?: string): string[] {
   return types;
 }
 
-function DieBox({
+// SVG polygon definitions for each die type (100×100 viewBox)
+type DieConfig = {
+  points?: string; // polygon points; omit for circle
+  circle?: true;   // render as circle instead of polygon
+  valueY: number;  // y-coord for the value text
+  labelY: number;  // y-coord for the die-type label text
+};
+
+const DIE_CONFIGS: Record<string, DieConfig> = {
+  // d4 — equilateral triangle pointing up
+  d4:  { points: "50,8 88,88 12,88",                                 valueY: 60, labelY: 76 },
+  // d6 — square
+  d6:  { points: "10,10 90,10 90,90 10,90",                          valueY: 46, labelY: 68 },
+  // d8 — regular octagon
+  d8:  { points: "50,8 80,20 92,50 80,80 50,92 20,80 8,50 20,20",    valueY: 46, labelY: 65 },
+  // d10 — regular pentagon pointing up
+  d10: { points: "50,8 90,37 75,84 25,84 10,37",                     valueY: 50, labelY: 68 },
+  // d12 — regular pentagon with flat top (rotated 36°)
+  d12: { points: "75,16 90,63 50,92 10,63 25,16",                    valueY: 50, labelY: 68 },
+  // d20 — regular hexagon
+  d20: { points: "50,8 86,29 86,71 50,92 14,71 14,29",               valueY: 50, labelY: 67 },
+  // d100 — circle
+  d100: { circle: true,                                               valueY: 46, labelY: 65 },
+};
+
+const DEFAULT_DIE_CONFIG = DIE_CONFIGS.d6;
+
+function getDieConfig(dieType: string): DieConfig {
+  return DIE_CONFIGS[dieType.toLowerCase()] ?? DEFAULT_DIE_CONFIG;
+}
+
+function DieShape({
   dieType,
   value,
+  settled,
 }: {
   dieType: string;
   value: number | string;
+  settled: boolean;
 }) {
+  const config = getDieConfig(dieType);
+  const stroke = settled
+    ? "var(--mantine-color-blue-filled)"
+    : "var(--mantine-color-gray-filled)";
+  const fill = "var(--mantine-color-body)";
+  const sharedShapeProps = {
+    fill,
+    stroke,
+    strokeWidth: 3.5,
+    strokeLinejoin: "round" as const,
+  };
+
   return (
-    <Box
-      style={{
-        border: `2px solid var(--mantine-color-${typeof value === "number" ? "blue" : "gray"}-filled)`,
-        borderRadius: 8,
-        padding: "4px 10px",
-        minWidth: "3.2rem",
-        textAlign: "center",
-      }}
+    <svg
+      viewBox="0 0 100 100"
+      width={60}
+      height={60}
+      style={{ display: "block", flexShrink: 0 }}
     >
-      <Text size="xs" c="dimmed">
-        {dieType}
-      </Text>
-      <Text fw="bold" size="lg">
+      {config.circle ? (
+        <circle cx="50" cy="50" r="43" {...sharedShapeProps} />
+      ) : (
+        <polygon points={config.points} {...sharedShapeProps} />
+      )}
+      <text
+        x="50"
+        y={config.valueY}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{
+          fontSize: "26px",
+          fontWeight: 700,
+          fill: "var(--mantine-color-text)",
+          fontFamily: "inherit",
+        }}
+      >
         {value}
-      </Text>
-    </Box>
+      </text>
+      <text
+        x="50"
+        y={config.labelY}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{
+          fontSize: "13px",
+          fill: "var(--mantine-color-dimmed)",
+          fontFamily: "inherit",
+        }}
+      >
+        {dieType}
+      </text>
+    </svg>
   );
 }
 
@@ -74,14 +142,19 @@ function LoadingDie({ dieType }: { dieType: string }) {
     return () => clearTimeout(timeoutId);
   }, [sides]);
 
-  return <DieBox dieType={dieType} value={displayValue} />;
+  return <DieShape dieType={dieType} value={displayValue} settled={false} />;
 }
 
 function StaticDiceResults({ diceResults }: { diceResults: DiceResult[] }) {
   return (
     <Flex wrap="wrap" gap="xs" p="xs">
       {diceResults.map((result, i) => (
-        <DieBox key={i} dieType={result.dieType} value={result.value} />
+        <DieShape
+          key={i}
+          dieType={result.dieType}
+          value={result.value}
+          settled={true}
+        />
       ))}
     </Flex>
   );
