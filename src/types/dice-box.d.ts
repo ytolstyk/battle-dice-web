@@ -59,6 +59,7 @@ type ParsedFinalResult = {
 declare module "@3d-dice/dice-box" {
   interface DiceBoxOptions {
     id?: string;
+    container?: string;
     theme?: string;
     assetPath?: string;
     scale?: number;
@@ -67,6 +68,7 @@ declare module "@3d-dice/dice-box" {
   }
 
   class DiceBoxClass {
+    canvas: HTMLCanvasElement;
     constructor(options?: DiceBoxOptions);
     init(): Promise<void>;
     show(): this;

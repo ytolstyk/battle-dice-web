@@ -5,10 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev       # Start Vite dev server (localhost:5173)
-npm run build     # TypeScript compile + Vite production build
-npm run lint      # Run ESLint
-npm run preview   # Preview production build locally
+npm run dev                 # Start Vite dev server (localhost:5173)
+rtk tsc                     # Type-check (tsc -b)
+rtk err npm run build       # Production build (vite build)
+rtk lint                    # ESLint (flat config, v9+)
+npm run preview             # Preview production build locally
 ```
 
 No test suite is configured.
@@ -59,7 +60,8 @@ Only the room owner (`room.ownerId === userId`) can change `diceRules`. The dice
 
 Before finishing any task, run the following commands:
 
-1. **Lint:** `npm run lint`
-2. **Types:** `npm run type-check`
+1. **Lint** `rtk lint`
+2. **Types** `rtk tsc`
+3. **Build** `err npm run build`
 
 If any command fails, fix the issue before submitting.

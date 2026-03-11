@@ -136,6 +136,7 @@ export function DiceTray({
     if (diceBoxRef.current) {
       const DiceBox = new DiceBoxClass({
         id: diceBoxId,
+        container: `#${diceBoxId}`,
         assetPath: "/assets/",
         scale: 6,
         onRollComplete: (rawResults) => {
@@ -163,18 +164,9 @@ export function DiceTray({
       DiceBox.init().then(() => {
         setDiceBoxInstance(DiceBox);
 
-        /*
-          Canvas appears outside the React DOM tree.
-          We need to put it inside the tree before rolling, so we can style it
-          and make it look like it's inside the app.
-        */
-        const canvas = document.getElementsByClassName("dice-box-canvas")[0];
-
-        if (diceBoxRef.current) {
-          canvas.removeAttribute("width");
-          canvas.removeAttribute("height");
-          diceBoxRef.current.appendChild(canvas);
-        }
+        // Remove hardcoded dimensions so CSS controls the canvas size
+        DiceBox.canvas.removeAttribute("width");
+        DiceBox.canvas.removeAttribute("height");
       });
     }
 
