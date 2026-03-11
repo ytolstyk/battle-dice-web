@@ -11,7 +11,8 @@
       "WebSearch",
       "WebFetch(domain:wiki.roll20.net)",
       "WebFetch(domain:metacpan.org)",
-      "WebFetch(domain:fantasticdice.games)"
+      "WebFetch(domain:fantasticdice.games)",
+      "Bash(rtk err:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

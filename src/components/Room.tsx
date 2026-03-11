@@ -24,8 +24,7 @@ import { useSearchParams } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import { ShareRoomModal } from "./ShareRoomModal";
 import { useDiceWebSocket } from "../hooks/useDiceWebSocket";
-import { IconHelp, IconShare } from "@tabler/icons-react";
-import { useThrottle } from "@custom-react-hooks/use-throttle";
+import { IconCheck, IconHelp, IconShare } from "@tabler/icons-react";
 import type { Roll } from "./types";
 import styles from "./diceTray.module.css";
 import { UserContext } from "./UserContext";
@@ -35,7 +34,6 @@ export function Room() {
   const { roomId } = useParams();
   const { userId, userName } = useContext(UserContext);
   const [diceCombination, setDiceCombination] = useState("2d6 + 1d8 + 1d12");
-  const throttledDiceCombination = useThrottle(diceCombination, 1000);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
@@ -98,17 +96,16 @@ export function Room() {
     }
   }, [roomId, userName]);
 
-  useEffect(() => {
-    if (roomId && throttledDiceCombination) {
-      updateDiceRules(roomId, throttledDiceCombination);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, throttledDiceCombination]);
-
   const handleDiceCombinationChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setDiceCombination(event.target.value);
+  };
+
+  const handleApplyDiceRules = () => {
+    if (roomId && diceCombination) {
+      updateDiceRules(roomId, diceCombination);
+    }
   };
 
   const handleShareClick = () => {
@@ -325,6 +322,16 @@ export function Room() {
           styles={{ input: { textAlign: "center" } }}
           disabled={!isConnected}
         />
+        <ActionIcon
+          variant="filled"
+          size="lg"
+          radius="xl"
+          onClick={handleApplyDiceRules}
+          disabled={!isConnected || !diceCombination.trim()}
+          aria-label="Apply dice rules"
+        >
+          <IconCheck size={18} />
+        </ActionIcon>
         <ActionIcon
           variant="subtle"
           color="gray"
