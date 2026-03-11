@@ -1,12 +1,6 @@
-import { ActionIcon, Flex, Paper, Text } from "@mantine/core";
-import type { User } from "./types";
+import { ActionIcon, Box, Flex, Paper, Text } from "@mantine/core";
+import type { DiceResult, User } from "./types";
 import {
-  IconDice6,
-  IconDice5,
-  IconDice4,
-  IconDice3,
-  IconDice2,
-  IconDice1,
   IconLaurelWreath,
   IconSquareCheck,
   IconSquareX,
@@ -18,29 +12,119 @@ type Props = {
   player: User;
   isWinner: boolean;
   isOwner: boolean;
+  diceRules?: string;
   onApproveReroll: () => void;
   onDeclineReroll: () => void;
+  onAnimationComplete?: () => void;
 };
 
-const ICON_MAP = [
-  IconDice1,
-  IconDice2,
-  IconDice3,
-  IconDice4,
-  IconDice5,
-  IconDice6,
-];
+function parseDiceTypes(diceRules?: string): string[] {
+  if (!diceRules) return ["d6", "d6"];
+  const matches = [...diceRules.matchAll(/(\d+)d(\d+)/gi)];
+  if (matches.length === 0) return ["d6", "d6"];
+  const types: string[] = [];
+  for (const m of matches) {
+    const count = parseInt(m[1]);
+    const face = m[2];
+    for (let i = 0; i < count; i++) types.push(`d${face}`);
+  }
+  return types;
+}
+
+function DieBox({
+  dieType,
+  value,
+}: {
+  dieType: string;
+  value: number | string;
+}) {
+  return (
+    <Box
+      style={{
+        border: `2px solid var(--mantine-color-${typeof value === "number" ? "blue" : "gray"}-filled)`,
+        borderRadius: 8,
+        padding: "4px 10px",
+        minWidth: "3.2rem",
+        textAlign: "center",
+      }}
+    >
+      <Text size="xs" c="dimmed">
+        {dieType}
+      </Text>
+      <Text fw="bold" size="lg">
+        {value}
+      </Text>
+    </Box>
+  );
+}
+
+function LoadingDie({ dieType }: { dieType: string }) {
+  const sides = parseInt(dieType.replace("d", "")) || 6;
+  const [displayValue, setDisplayValue] = useState(
+    () => Math.floor(Math.random() * sides) + 1,
+  );
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    function tick() {
+      setDisplayValue(Math.floor(Math.random() * sides) + 1);
+      timeoutId = setTimeout(tick, 80 + Math.random() * 140);
+    }
+    timeoutId = setTimeout(tick, 80 + Math.random() * 140);
+    return () => clearTimeout(timeoutId);
+  }, [sides]);
+
+  return <DieBox dieType={dieType} value={displayValue} />;
+}
+
+function StaticDiceResults({ diceResults }: { diceResults: DiceResult[] }) {
+  return (
+    <Flex wrap="wrap" gap="xs" p="xs">
+      {diceResults.map((result, i) => (
+        <DieBox key={i} dieType={result.dieType} value={result.value} />
+      ))}
+    </Flex>
+  );
+}
+
+type Phase = "idle" | "done";
 
 export function OpponentTray({
   player,
   isWinner,
   isOwner,
+  diceRules,
   onApproveReroll,
   onDeclineReroll,
+  onAnimationComplete,
 }: Props) {
-  const [iconIndex, setIconIndex] = useState(0);
-  const hasResults = player.roll.total && player.roll.diceResults.length > 0;
+  const hasResults = !!(player.roll.total && player.roll.diceResults.length > 0);
   const paperRef = useRef<HTMLDivElement>(null);
+  const onAnimationCompleteRef = useRef(onAnimationComplete);
+  onAnimationCompleteRef.current = onAnimationComplete;
+
+  const [phase, setPhase] = useState<Phase>(() => (hasResults ? "done" : "idle"));
+  const prevStatusRef = useRef(player.status);
+
+  // On mount: if results already exist (page refresh), notify immediately
+  useEffect(() => {
+    if (hasResults) onAnimationCompleteRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = player.status;
+
+    if (player.status === "rolling") {
+      setPhase("idle");
+    } else if (player.status === "hasRolled" && prev === "rolling") {
+      setPhase("done");
+      onAnimationCompleteRef.current?.();
+    } else if (player.status === "connected") {
+      setPhase("idle");
+    }
+  }, [player.status]);
 
   useEffect(() => {
     if (!isWinner || !paperRef.current) return;
@@ -61,54 +145,35 @@ export function OpponentTray({
     frame();
   }, [isWinner]);
 
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    if (player.status === "rolling") {
-      interval = setInterval(() => {
-        setIconIndex((prev) => (prev + 1) % ICON_MAP.length);
-      }, 300);
+  function renderDiceArea() {
+    if (player.status === "rolling" && phase === "idle") {
+      const dieTypes = parseDiceTypes(diceRules);
+      return (
+        <Flex wrap="wrap" gap="xs" p="xs">
+          {dieTypes.map((dieType, i) => (
+            <LoadingDie key={i} dieType={dieType} />
+          ))}
+        </Flex>
+      );
     }
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [player.status]);
-
-  function renderResult() {
-    if (!hasResults) {
-      return null;
+    if (phase === "done" && hasResults) {
+      return (
+        <Flex direction="column" flex={1} style={{ overflowY: "auto" }}>
+          <Flex direction="column" px="xs" pt="xs">
+            {player.roll.modDescription && (
+              <Text size="xs" c="dimmed">
+                {player.roll.modDescription}
+              </Text>
+            )}
+            <Text fw="bold">Result: {player.roll.total}</Text>
+          </Flex>
+          <StaticDiceResults diceResults={player.roll.diceResults} />
+        </Flex>
+      );
     }
 
-    const text = player.roll.diceResults
-      .map((res) => {
-        return `${res.dieType}: ${res.value}`;
-      })
-      .join(", ");
-
-    return (
-      <>
-        <Text flex={1} style={{ overflowY: "auto" }}>
-          {text}
-        </Text>
-        {player.roll.modDescription && (
-          <Text size="xs" c="dimmed">
-            {player.roll.modDescription}
-          </Text>
-        )}
-        <Text fw="bold">Result: {player.roll.total}</Text>
-      </>
-    );
-  }
-
-  function renderRollIcon() {
-    if (player.status !== "rolling") {
-      return null;
-    }
-
-    const Icon = ICON_MAP[iconIndex];
-
-    return <Icon size={24} color="var(--mantine-color-blue-filled)" />;
+    return null;
   }
 
   const winnerIcon = isWinner ? (
@@ -146,7 +211,6 @@ export function OpponentTray({
     <Paper ref={paperRef} withBorder shadow="md" p="md" h="100%">
       <Flex
         p="xs"
-        mb="xs"
         style={{
           backgroundColor:
             "color-mix(in srgb, var(--mantine-color-body) 50%, transparent)",
@@ -155,16 +219,15 @@ export function OpponentTray({
         direction="column"
         h="100%"
       >
-        <Flex align="center" mb={hasResults ? "xs" : 0}>
+        <Flex align="center" mb={phase !== "idle" ? "xs" : 0}>
           <Text size="xl" fw="bold" inline mr="xs">
             {player.name}
           </Text>
           {winnerIcon}
           <Flex flex={1} />
-          {renderRollIcon()}
           {rerollRequest}
         </Flex>
-        {renderResult()}
+        {renderDiceArea()}
       </Flex>
     </Paper>
   );

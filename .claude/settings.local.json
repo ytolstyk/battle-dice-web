@@ -12,7 +12,10 @@
       "WebFetch(domain:wiki.roll20.net)",
       "WebFetch(domain:metacpan.org)",
       "WebFetch(domain:fantasticdice.games)",
-      "Bash(rtk err:*)"
+      "Bash(rtk err:*)",
+      "Bash(wc -l /Users/yuriytolstykh/code/opposing-dice-web/src/components/*.tsx /Users/yuriytolstykh/code/opposing-dice-web/src/hooks/*.ts)",
+      "Bash(rtk tsc:*)",
+      "Bash(./node_modules/.bin/eslint src/components/OpponentTray.tsx 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,

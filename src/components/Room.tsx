@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { DiceTray } from "./DiceTray";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { OpponentTray } from "./OpponentTray";
 import {
   ActionIcon,
@@ -54,6 +54,33 @@ export function Room() {
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
+
+  const [animationsDone, setAnimationsDone] = useState<Set<string>>(new Set());
+
+  const markAnimationDone = useCallback((playerId: string) => {
+    setAnimationsDone((prev) => new Set([...prev, playerId]));
+  }, []);
+
+  // Reset tracking when the round resets (all participants back to connected)
+  useEffect(() => {
+    if (!room) return;
+    const anyRolled = room.participants.some(
+      (p) => p.status !== "connected" || p.roll.total > 0,
+    );
+    if (!anyRolled) setAnimationsDone(new Set());
+  }, [room]);
+
+
+  // Handle page-refresh: user already has a result on load
+  useEffect(() => {
+    if (roomUser?.status === "hasRolled") markAnimationDone(userId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomUser?.status]);
+
+  const allAnimationsDone = useMemo(() => {
+    if (!room || winners.length === 0) return false;
+    return room.participants.every((p) => animationsDone.has(p.id));
+  }, [room, winners, animationsDone]);
 
   useEffect(() => {
     if (roomId && isConnected && userName && !hasJoinedRef.current) {
@@ -127,6 +154,7 @@ export function Room() {
   const handleRollDiceResult = (roll: Roll) => {
     if (roomId) {
       updateUserRollResult(roomId, roll);
+      markAnimationDone(userId);
     }
   };
 
@@ -184,17 +212,20 @@ export function Room() {
         continue;
       }
 
-      const isWinner = winners.map((u) => u.id).includes(player.id);
+      const isOpponentWinner =
+        allAnimationsDone && winners.map((u) => u.id).includes(player.id);
       const isOwner = room.ownerId === userId;
 
       trays.push(
         <Box key={player.id} flex={1} maw="20rem" h="100%">
           <OpponentTray
             player={player}
-            isWinner={isWinner}
+            isWinner={isOpponentWinner}
             isOwner={isOwner}
+            diceRules={room.diceRules}
             onApproveReroll={() => roomId && approveReroll(roomId, player.id)}
             onDeclineReroll={() => roomId && declineReroll(roomId, player.id)}
+            onAnimationComplete={() => markAnimationDone(player.id)}
           />
         </Box>,
       );
@@ -346,7 +377,7 @@ export function Room() {
     );
   }
 
-  const isWinner = winners.map((u) => u.id).includes(userId);
+  const isWinner = allAnimationsDone && winners.map((u) => u.id).includes(userId);
 
   return (
     <Box
