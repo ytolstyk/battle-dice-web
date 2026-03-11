@@ -39,7 +39,7 @@ This is a React + TypeScript SPA (Vite) for a real-time multiplayer dice-rolling
 
 ### 3D Dice Rendering
 
-`DiceTray` uses `@3d-dice/dice-box` (WebAssembly via `vite-plugin-wasm`). The dice canvas is rendered outside React's DOM tree and manually moved inside a ref container after init. Assets must be in `public/assets/` (the `dice-box` WebAssembly and theme files are under `src/assets/dice-box/` and served via Vite's asset pipeline). Dice notation is parsed by `@3d-dice/dice-parser-interface`. Results flow: `DiceBox.onRollComplete` → `parseDiceBoxResults` (maps raw rolls to `Roll`) → `updateUserRollResult` socket emit.
+`DiceTray` uses `@3d-dice/dice-box` (WebAssembly via `vite-plugin-wasm`). Assets must be in `public/assets/` (the `dice-box` WebAssembly and theme files are under `src/assets/dice-box/` and served via Vite's asset pipeline). Dice notation is parsed by `@3d-dice/dice-parser-interface`. Results flow: `DiceBox.onRollComplete` → `parseDiceBoxResults` (maps raw rolls to `Roll`) → `updateUserRollResult` socket emit.
 
 ### Room Ownership
 

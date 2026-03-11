@@ -3,14 +3,18 @@ import { DiceTray } from "./DiceTray";
 import { useContext, useEffect, useRef, useState } from "react";
 import { OpponentTray } from "./OpponentTray";
 import {
+  ActionIcon,
   Box,
   Button,
   Center,
+  Code,
+  Divider,
   Flex,
+  Group,
   Loader,
   LoadingOverlay,
   Paper,
-  Popover,
+  Stack,
   Text,
   TextInput,
   Title,
@@ -20,7 +24,7 @@ import { useSearchParams } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import { ShareRoomModal } from "./ShareRoomModal";
 import { useDiceWebSocket } from "../hooks/useDiceWebSocket";
-import { IconInfoSquareRounded, IconShare } from "@tabler/icons-react";
+import { IconHelp, IconShare } from "@tabler/icons-react";
 import { useThrottle } from "@custom-react-hooks/use-throttle";
 import type { Roll } from "./types";
 import styles from "./diceTray.module.css";
@@ -213,35 +217,125 @@ export function Room() {
     );
   }
 
+  function handleDiceRulesHelp() {
+    modals.open({
+      title: "Dice Rules Reference",
+      size: "md",
+      children: (
+        <Stack gap="md" pb="sm">
+          <Text size="sm" c="dimmed">
+            Uses standard dice notation (Roll20 spec). Basic format:{" "}
+            <Code>XdY</Code> — roll <em>X</em> dice with <em>Y</em> sides.
+          </Text>
+
+          <Stack gap="xs">
+            <Text size="sm" fw={700}>Basics</Text>
+            <Divider />
+            {[
+              ["d20", "One twenty-sided die"],
+              ["4d6", "Four six-sided dice, sum all"],
+              ["2d4 + 1d8", "Mix dice types with +"],
+              ["1d6 + 2", "Add a flat modifier"],
+            ].map(([ex, desc]) => (
+              <Group key={ex} gap="xs" wrap="nowrap">
+                <Code style={{ minWidth: 120 }}>{ex}</Code>
+                <Text size="sm" c="dimmed">{desc}</Text>
+              </Group>
+            ))}
+          </Stack>
+
+          <Stack gap="xs">
+            <Text size="sm" fw={700}>Keep / Drop</Text>
+            <Divider />
+            {[
+              ["4d6kh3", "Keep highest 3"],
+              ["4d6kl3", "Keep lowest 3"],
+              ["4d6k3", "Keep highest 3 (shorthand)"],
+              ["4d6dh1", "Drop highest 1"],
+              ["4d6dl1", "Drop lowest 1 (shorthand: 4d6d1)"],
+            ].map(([ex, desc]) => (
+              <Group key={ex} gap="xs" wrap="nowrap">
+                <Code style={{ minWidth: 120 }}>{ex}</Code>
+                <Text size="sm" c="dimmed">{desc}</Text>
+              </Group>
+            ))}
+          </Stack>
+
+          <Stack gap="xs">
+            <Text size="sm" fw={700}>Reroll</Text>
+            <Divider />
+            {[
+              ["2d8r1", "Reroll any 1s"],
+              ["2d8r<3", "Reroll if less than 3"],
+              ["2d8r>=7", "Reroll if 7 or higher"],
+            ].map(([ex, desc]) => (
+              <Group key={ex} gap="xs" wrap="nowrap">
+                <Code style={{ minWidth: 120 }}>{ex}</Code>
+                <Text size="sm" c="dimmed">{desc}</Text>
+              </Group>
+            ))}
+          </Stack>
+
+          <Stack gap="xs">
+            <Text size="sm" fw={700}>Exploding</Text>
+            <Divider />
+            {[
+              ["3d6!", "Explode on max value (re-roll and add)"],
+              ["3d6!>4", "Explode on 4 or higher"],
+              ["3d6!3", "Explode only on a 3"],
+            ].map(([ex, desc]) => (
+              <Group key={ex} gap="xs" wrap="nowrap">
+                <Code style={{ minWidth: 120 }}>{ex}</Code>
+                <Text size="sm" c="dimmed">{desc}</Text>
+              </Group>
+            ))}
+          </Stack>
+
+          <Stack gap="xs">
+            <Text size="sm" fw={700}>Special</Text>
+            <Divider />
+            {[
+              ["dF", "Fate/Fudge die (−1, 0, or +1)"],
+              ["4dF", "Four Fate dice"],
+            ].map(([ex, desc]) => (
+              <Group key={ex} gap="xs" wrap="nowrap">
+                <Code style={{ minWidth: 120 }}>{ex}</Code>
+                <Text size="sm" c="dimmed">{desc}</Text>
+              </Group>
+            ))}
+          </Stack>
+        </Stack>
+      ),
+    });
+  }
+
   function renderDiceRules() {
     if (room?.ownerId !== userId) {
       return <Text>Current roll: {room?.diceRules}</Text>;
     }
 
     return (
-      <>
+      <Group gap="xs" wrap="nowrap">
         <TextInput
-          w={240}
+          w={180}
           type="text"
           placeholder="Dice rules"
           value={diceCombination}
           onChange={handleDiceCombinationChange}
-          mr="sm"
           styles={{ input: { textAlign: "center" } }}
           disabled={!isConnected}
         />
-        <Popover width={200} position="bottom" withArrow shadow="md">
-          <Popover.Target>
-            <IconInfoSquareRounded size={20} style={{ cursor: "pointer" }} />
-          </Popover.Target>
-          <Popover.Dropdown>
-            <Text size="xs">
-              Describe the dice you want to roll. For instance, to roll 2d4 with
-              1d8, write "2d4 + 1d8" in the text box.
-            </Text>
-          </Popover.Dropdown>
-        </Popover>
-      </>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="lg"
+          radius="xl"
+          onClick={handleDiceRulesHelp}
+          aria-label="Dice rules help"
+        >
+          <IconHelp size={20} />
+        </ActionIcon>
+      </Group>
     );
   }
 

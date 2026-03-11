@@ -3,11 +3,19 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(node:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(rtk lint:*)",
+      "WebFetch(domain:help.roll20.net)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:roll20.zendesk.com)",
+      "WebSearch",
+      "WebFetch(domain:wiki.roll20.net)",
+      "WebFetch(domain:metacpan.org)",
+      "WebFetch(domain:fantasticdice.games)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "jcodemunch"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
