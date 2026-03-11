@@ -182,6 +182,16 @@ export function DiceTray({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const prevStatusRef = useRef(roomUser?.status);
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = roomUser?.status;
+    if (roomUser?.status === "connected" && prev !== "connected" && prev !== undefined) {
+      diceBoxInstance?.clear();
+      setIsDisabled(false);
+    }
+  }, [roomUser?.status, diceBoxInstance]);
+
   useEffect(() => {
     if (!isWinner) return;
     const end = Date.now() + 3000;

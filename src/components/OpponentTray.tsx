@@ -101,7 +101,7 @@ function DieShape({
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: "26px",
+          fontSize: "32px",
           fontWeight: 700,
           fill: "var(--mantine-color-text)",
           fontFamily: "inherit",
@@ -115,7 +115,7 @@ function DieShape({
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: "13px",
+          fontSize: "16px",
           fill: "var(--mantine-color-dimmed)",
           fontFamily: "inherit",
         }}
