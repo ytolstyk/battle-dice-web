@@ -20,6 +20,7 @@ import {
   Group,
   Loader,
   LoadingOverlay,
+  Menu,
   Paper,
   Stack,
   Text,
@@ -31,7 +32,12 @@ import { useSearchParams } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import { ShareRoomModal } from "./ShareRoomModal";
 import { useDiceWebSocket } from "../hooks/useDiceWebSocket";
-import { IconCheck, IconHelp, IconShare } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconChevronDown,
+  IconHelp,
+  IconShare,
+} from "@tabler/icons-react";
 import type { Roll } from "./types";
 import styles from "./diceTray.module.css";
 import { UserContext } from "./UserContext";
@@ -40,7 +46,7 @@ import { AddUserName } from "./AddUserName";
 export function Room() {
   const { roomId } = useParams();
   const { userId, userName } = useContext(UserContext);
-  const [diceCombination, setDiceCombination] = useState("2d6 + 1d8 + 1d12");
+  const [diceCombination, setDiceCombination] = useState("1d6 + 1d8 + 5");
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
@@ -378,6 +384,15 @@ export function Room() {
     });
   }
 
+  const DICE_PRESETS = [
+    { label: "1d6 — Standard die", value: "1d6" },
+    { label: "2d6 — Two dice", value: "2d6" },
+    { label: "1d20 — Twenty-sided", value: "1d20" },
+    { label: "4d6kh3 — D&D ability score", value: "4d6kh3" },
+    { label: "2d6 + 1d4 — Mixed", value: "2d6 + 1d4" },
+    { label: "3d6! — Exploding", value: "3d6!" },
+  ];
+
   function renderDiceRules() {
     if (room?.ownerId !== userId) {
       return <Text>Current roll: {room?.diceRules}</Text>;
@@ -385,6 +400,30 @@ export function Room() {
 
     return (
       <Group gap="xs" wrap="nowrap">
+        <Menu shadow="md" width={220}>
+          <Menu.Target>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              radius="xl"
+              aria-label="Dice presets"
+              disabled={!isConnected}
+            >
+              <IconChevronDown size={16} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Common combinations</Menu.Label>
+            {DICE_PRESETS.map((preset) => (
+              <Menu.Item
+                key={preset.value}
+                onClick={() => setDiceCombination(preset.value)}
+              >
+                {preset.label}
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
         <TextInput
           w={180}
           type="text"

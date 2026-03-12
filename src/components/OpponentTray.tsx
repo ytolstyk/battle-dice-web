@@ -66,10 +66,12 @@ function DieShape({
   dieType,
   value,
   settled,
+  size = 60,
 }: {
   dieType: string;
   value: number | string;
   settled: boolean;
+  size?: number;
 }) {
   const config = getDieConfig(dieType);
   const stroke = settled
@@ -86,8 +88,8 @@ function DieShape({
   return (
     <svg
       viewBox="0 0 100 100"
-      width={60}
-      height={60}
+      width={size}
+      height={size}
       style={{ display: "block", flexShrink: 0 }}
     >
       {config.circle ? (
@@ -142,7 +144,7 @@ function LoadingDie({ dieType }: { dieType: string }) {
     return () => clearTimeout(timeoutId);
   }, [sides]);
 
-  return <DieShape dieType={dieType} value={displayValue} settled={false} />;
+  return <DieShape dieType={dieType} value={displayValue} settled={false} size={40} />;
 }
 
 function StaticDiceResults({ diceResults }: { diceResults: DiceResult[] }) {

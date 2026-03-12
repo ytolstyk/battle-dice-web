@@ -62,6 +62,6 @@ Before finishing any task, run the following commands:
 
 1. **Lint** `rtk lint`
 2. **Types** `rtk tsc`
-3. **Build** `err npm run build`
+3. **Build** `rtk err npm run build`
 
 If any command fails, fix the issue before submitting.
