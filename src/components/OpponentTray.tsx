@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
+import DiceParser from "@3d-dice/dice-parser-interface";
 
 type Props = {
   player: User;
@@ -19,16 +20,20 @@ type Props = {
 };
 
 function parseDiceTypes(diceRules?: string): string[] {
-  if (!diceRules) return ["d6", "d6"];
-  const matches = [...diceRules.matchAll(/(\d+)d(\d+)/gi)];
-  if (matches.length === 0) return ["d6", "d6"];
-  const types: string[] = [];
-  for (const m of matches) {
-    const count = parseInt(m[1]);
-    const face = m[2];
-    for (let i = 0; i < count; i++) types.push(`d${face}`);
+  if (!diceRules?.trim()) return ["d6", "d6"];
+  try {
+    const parser = new DiceParser();
+    const groups = parser.parseNotation(diceRules);
+    if (!groups || groups.length === 0) return ["d6", "d6"];
+    const types: string[] = [];
+    for (const group of groups) {
+      const qty = typeof group.qty === "number" ? group.qty : 1;
+      for (let i = 0; i < qty; i++) types.push(`d${group.sides}`);
+    }
+    return types.length > 0 ? types : ["d6", "d6"];
+  } catch {
+    return ["d6", "d6"];
   }
-  return types;
 }
 
 // SVG polygon definitions for each die type (100×100 viewBox)
