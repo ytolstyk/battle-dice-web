@@ -41,19 +41,19 @@ type DieConfig = {
 
 const DIE_CONFIGS: Record<string, DieConfig> = {
   // d4 — equilateral triangle pointing up
-  d4:  { points: "50,8 88,88 12,88",                                 valueY: 60, labelY: 76 },
+  d4:  { points: "50,8 88,88 12,88",                                 valueY: 55, labelY: 80 },
   // d6 — square
-  d6:  { points: "10,10 90,10 90,90 10,90",                          valueY: 46, labelY: 68 },
+  d6:  { points: "10,10 90,10 90,90 10,90",                          valueY: 40, labelY: 72 },
   // d8 — regular octagon
-  d8:  { points: "50,8 80,20 92,50 80,80 50,92 20,80 8,50 20,20",    valueY: 46, labelY: 65 },
+  d8:  { points: "50,8 80,20 92,50 80,80 50,92 20,80 8,50 20,20",    valueY: 40, labelY: 70 },
   // d10 — regular pentagon pointing up
-  d10: { points: "50,8 90,37 75,84 25,84 10,37",                     valueY: 50, labelY: 68 },
+  d10: { points: "50,8 90,37 75,84 25,84 10,37",                     valueY: 44, labelY: 73 },
   // d12 — regular pentagon with flat top (rotated 36°)
-  d12: { points: "75,16 90,63 50,92 10,63 25,16",                    valueY: 50, labelY: 68 },
+  d12: { points: "75,16 90,63 50,92 10,63 25,16",                    valueY: 44, labelY: 73 },
   // d20 — regular hexagon
-  d20: { points: "50,8 86,29 86,71 50,92 14,71 14,29",               valueY: 50, labelY: 67 },
+  d20: { points: "50,8 86,29 86,71 50,92 14,71 14,29",               valueY: 44, labelY: 72 },
   // d100 — circle
-  d100: { circle: true,                                               valueY: 46, labelY: 65 },
+  d100: { circle: true,                                               valueY: 40, labelY: 70 },
 };
 
 const DEFAULT_DIE_CONFIG = DIE_CONFIGS.d6;
@@ -66,7 +66,7 @@ function DieShape({
   dieType,
   value,
   settled,
-  size = 60,
+  size = 54,
 }: {
   dieType: string;
   value: number | string;
@@ -103,7 +103,7 @@ function DieShape({
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: "32px",
+          fontSize: "40px",
           fontWeight: 700,
           fill: "var(--mantine-color-text)",
           fontFamily: "inherit",
@@ -117,7 +117,7 @@ function DieShape({
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: "16px",
+          fontSize: "20px",
           fill: "var(--mantine-color-dimmed)",
           fontFamily: "inherit",
         }}
@@ -144,7 +144,7 @@ function LoadingDie({ dieType }: { dieType: string }) {
     return () => clearTimeout(timeoutId);
   }, [sides]);
 
-  return <DieShape dieType={dieType} value={displayValue} settled={false} size={40} />;
+  return <DieShape dieType={dieType} value={displayValue} settled={false} />;
 }
 
 function StaticDiceResults({ diceResults }: { diceResults: DiceResult[] }) {
