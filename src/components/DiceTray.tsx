@@ -105,6 +105,7 @@ type Props = {
   onRequestReroll: () => void;
   onResetRoom: () => void;
   onUpdateUserName?: (name: string) => void;
+  onPaperWidth?: (w: number) => void;
 };
 
 export function DiceTray({
@@ -119,6 +120,7 @@ export function DiceTray({
   onRequestReroll,
   onResetRoom,
   onUpdateUserName,
+  onPaperWidth,
 }: Props) {
   const drpRef = useRef(new DiceParser());
   const modDescriptionRef = useRef("");
@@ -131,6 +133,18 @@ export function DiceTray({
   const buttonDisabledRef = useRef(false);
   const handleRollRef = useRef<() => void>(null);
   const motionPermissionRef = useRef(false);
+  const paperRef = useRef<HTMLDivElement>(null);
+  const onPaperWidthRef = useRef(onPaperWidth);
+  onPaperWidthRef.current = onPaperWidth;
+
+  useEffect(() => {
+    if (!paperRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      onPaperWidthRef.current?.(entry.contentRect.width);
+    });
+    ro.observe(paperRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (diceBoxRef.current) {
@@ -328,8 +342,9 @@ export function DiceTray({
   ) : null;
 
   return (
-    <Flex direction="column" h="100%" align="center" justify="center" gap="sm">
-      <Paper shadow="sm" withBorder>
+    <Flex direction="column" h="100%" gap="sm" align="center">
+      <Flex flex={1} style={{ minHeight: 0, width: "100%", alignItems: "center", justifyContent: "center" }}>
+      <Paper ref={paperRef} shadow="sm" withBorder style={{ aspectRatio: "1/1", height: "100%", maxWidth: "100%", position: "relative" }}>
         <div
           id={diceBoxId}
           ref={diceBoxRef}
@@ -346,7 +361,8 @@ export function DiceTray({
           </div>
         </div>
       </Paper>
-      <Flex gap="sm">
+      </Flex>
+      <Flex gap="sm" justify="center">
         <Button variant="light" onClick={handleEditName}>
           Edit Name
         </Button>

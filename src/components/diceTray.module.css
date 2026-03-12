@@ -3,10 +3,8 @@
 }
 
 .diceBoxContainer {
-  position: relative;
-  width: 20rem;
-  height: 20rem;
-  aspect-ratio: 1 / 1;
+  position: absolute;
+  inset: 0;
 }
 
 .relative {

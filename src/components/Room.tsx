@@ -1,6 +1,13 @@
 import { useParams } from "react-router-dom";
 import { DiceTray } from "./DiceTray";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { OpponentTray } from "./OpponentTray";
 import {
   ActionIcon,
@@ -54,6 +61,7 @@ export function Room() {
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
+  const [traySize, setTraySize] = useState<number | undefined>(undefined);
 
   const [animationsDone, setAnimationsDone] = useState<Set<string>>(new Set());
 
@@ -69,7 +77,6 @@ export function Room() {
     );
     if (!anyRolled) setAnimationsDone(new Set());
   }, [room]);
-
 
   // Handle page-refresh: user already has a result on load
   useEffect(() => {
@@ -217,7 +224,7 @@ export function Room() {
       const isOwner = room.ownerId === userId;
 
       trays.push(
-        <Box key={player.id} flex={1} maw="20rem" h="100%">
+        <Box key={player.id} flex={1} maw={traySize} h="100%">
           <OpponentTray
             player={player}
             isWinner={isOpponentWinner}
@@ -257,7 +264,9 @@ export function Room() {
           </Text>
 
           <Stack gap="xs">
-            <Text size="sm" fw={700}>Basics</Text>
+            <Text size="sm" fw={700}>
+              Basics
+            </Text>
             <Divider />
             {[
               ["d20", "One twenty-sided die"],
@@ -267,13 +276,17 @@ export function Room() {
             ].map(([ex, desc]) => (
               <Group key={ex} gap="xs" wrap="nowrap">
                 <Code style={{ minWidth: 120 }}>{ex}</Code>
-                <Text size="sm" c="dimmed">{desc}</Text>
+                <Text size="sm" c="dimmed">
+                  {desc}
+                </Text>
               </Group>
             ))}
           </Stack>
 
           <Stack gap="xs">
-            <Text size="sm" fw={700}>Keep / Drop</Text>
+            <Text size="sm" fw={700}>
+              Keep / Drop
+            </Text>
             <Divider />
             {[
               ["4d6kh3", "Keep highest 3"],
@@ -284,13 +297,17 @@ export function Room() {
             ].map(([ex, desc]) => (
               <Group key={ex} gap="xs" wrap="nowrap">
                 <Code style={{ minWidth: 120 }}>{ex}</Code>
-                <Text size="sm" c="dimmed">{desc}</Text>
+                <Text size="sm" c="dimmed">
+                  {desc}
+                </Text>
               </Group>
             ))}
           </Stack>
 
           <Stack gap="xs">
-            <Text size="sm" fw={700}>Reroll</Text>
+            <Text size="sm" fw={700}>
+              Reroll
+            </Text>
             <Divider />
             {[
               ["2d8r1", "Reroll any 1s"],
@@ -299,13 +316,17 @@ export function Room() {
             ].map(([ex, desc]) => (
               <Group key={ex} gap="xs" wrap="nowrap">
                 <Code style={{ minWidth: 120 }}>{ex}</Code>
-                <Text size="sm" c="dimmed">{desc}</Text>
+                <Text size="sm" c="dimmed">
+                  {desc}
+                </Text>
               </Group>
             ))}
           </Stack>
 
           <Stack gap="xs">
-            <Text size="sm" fw={700}>Exploding</Text>
+            <Text size="sm" fw={700}>
+              Exploding
+            </Text>
             <Divider />
             {[
               ["3d6!", "Explode on max value (re-roll and add)"],
@@ -314,13 +335,17 @@ export function Room() {
             ].map(([ex, desc]) => (
               <Group key={ex} gap="xs" wrap="nowrap">
                 <Code style={{ minWidth: 120 }}>{ex}</Code>
-                <Text size="sm" c="dimmed">{desc}</Text>
+                <Text size="sm" c="dimmed">
+                  {desc}
+                </Text>
               </Group>
             ))}
           </Stack>
 
           <Stack gap="xs">
-            <Text size="sm" fw={700}>Special</Text>
+            <Text size="sm" fw={700}>
+              Special
+            </Text>
             <Divider />
             {[
               ["dF", "Fate/Fudge die (−1, 0, or +1)"],
@@ -328,7 +353,9 @@ export function Room() {
             ].map(([ex, desc]) => (
               <Group key={ex} gap="xs" wrap="nowrap">
                 <Code style={{ minWidth: 120 }}>{ex}</Code>
-                <Text size="sm" c="dimmed">{desc}</Text>
+                <Text size="sm" c="dimmed">
+                  {desc}
+                </Text>
               </Group>
             ))}
           </Stack>
@@ -377,7 +404,8 @@ export function Room() {
     );
   }
 
-  const isWinner = allAnimationsDone && winners.map((u) => u.id).includes(userId);
+  const isWinner =
+    allAnimationsDone && winners.map((u) => u.id).includes(userId);
 
   return (
     <Box
@@ -387,6 +415,7 @@ export function Room() {
           "calc(100dvh - var(--app-shell-header-height) - var(--app-shell-padding) * 2)",
         display: "flex",
         flexDirection: "column",
+        gap: "0.5rem",
       }}
     >
       <LoadingOverlay
@@ -403,44 +432,50 @@ export function Room() {
         }}
       />
 
-      <Box>
-        <Flex align="center" justify="center">
-          <Title order={2} ta="center" mr="sm">
-            Room {roomId}{" "}
+      <Box
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Flex align="center" justify="center" gap="xs">
+          <Title order={3} ta="center">
+            Room {roomId}
           </Title>
           <UnstyledButton onClick={handleShareClick} display="flex">
             <IconShare
-              size={30}
+              size={22}
               stroke={2}
               color="var(--mantine-color-blue-filled)"
             />
           </UnstyledButton>
         </Flex>
-        <Center mt="sm" mb="sm" h="auto">
+        <Flex align="center" justify="center" mb="xs">
           {renderDiceRules()}
-        </Center>
-      </Box>
-
-      <Flex direction="column" flex={1} style={{ minHeight: 0 }} gap="1rem">
-        <Box flex={1} style={{ overflow: "auto", minHeight: 0 }}>
+        </Flex>
+        <Box style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
           {renderDiceTrays()}
         </Box>
-        <Box flex={1}>
-          <DiceTray
-            isConnected={isConnected}
-            isOwner={room?.ownerId === userId}
-            diceCombination={room?.diceRules}
-            isWinner={isWinner}
-            roomUser={roomUser}
-            roomId={roomId}
-            onRollDice={handleRollDice}
-            onRollDiceResult={handleRollDiceResult}
-            onRequestReroll={handleRequestReroll}
-            onResetRoom={handleResetRoom}
-            onUpdateUserName={handleUpdateUserName}
-          />
-        </Box>
-      </Flex>
+      </Box>
+
+      <Box style={{ flex: 1, minHeight: 0 }}>
+        <DiceTray
+          isConnected={isConnected}
+          isOwner={room?.ownerId === userId}
+          diceCombination={room?.diceRules}
+          isWinner={isWinner}
+          roomUser={roomUser}
+          roomId={roomId}
+          onRollDice={handleRollDice}
+          onRollDiceResult={handleRollDiceResult}
+          onRequestReroll={handleRequestReroll}
+          onResetRoom={handleResetRoom}
+          onUpdateUserName={handleUpdateUserName}
+          onPaperWidth={setTraySize}
+        />
+      </Box>
     </Box>
   );
 }
