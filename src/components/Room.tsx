@@ -61,6 +61,8 @@ export function Room() {
   } = useDiceWebSocket();
 
   const hasJoinedRef = useRef(false);
+  const isNewRoomRef = useRef(searchParams.get("new") === "true");
+  const didSendInitialRulesRef = useRef(false);
   const [traySize, setTraySize] = useState<number | undefined>(undefined);
 
   const [animationsDone, setAnimationsDone] = useState<Set<string>>(new Set());
@@ -83,6 +85,18 @@ export function Room() {
     if (roomUser?.status === "hasRolled") markAnimationDone(userId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomUser?.status]);
+
+  useEffect(() => {
+    if (
+      isNewRoomRef.current &&
+      !didSendInitialRulesRef.current &&
+      room?.ownerId === userId &&
+      roomId
+    ) {
+      didSendInitialRulesRef.current = true;
+      updateDiceRules(roomId, diceCombination);
+    }
+  }, [room, userId, roomId, diceCombination, updateDiceRules]);
 
   const allAnimationsDone = useMemo(() => {
     if (!room || winners.length === 0) return false;
